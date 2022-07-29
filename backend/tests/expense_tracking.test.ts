@@ -1,9 +1,15 @@
-import { expect, test, describe } from 'vitest';
+import { expect, test, describe, beforeEach } from 'vitest';
+import { InMemoryRepository } from '../src/repository';
 import ExpenseTracker, { Expense } from '../src/services/expense_tracking';
 
 describe('Expense Tracking', () => {
-	test('adds a single expense', () => {
-		const tracker = new ExpenseTracker();
+	let tracker: ExpenseTracker;
+
+	beforeEach(() => {
+		tracker = new ExpenseTracker(new InMemoryRepository<Expense>());
+	});
+
+	test('adds a single expense', async () => {
 		const expense: Expense = {
 			id: 1,
 			name: 'Groceries',
@@ -11,15 +17,14 @@ describe('Expense Tracking', () => {
 			created: new Date(),
 		};
 
-		tracker.addExpense(expense);
-		const expenses = tracker.getExpenses();
+		await tracker.addExpense(expense);
+		const expenses = await tracker.getExpenses();
 
 		expect(expenses).toHaveLength(1);
 		expect(expenses[0]).toMatchObject(expense);
 	});
 
-	test('adds multiple expenses', () => {
-		const tracker = new ExpenseTracker();
+	test('adds multiple expenses', async () => {
 		const expenses: Expense[] = [
 			{
 				id: 1,
@@ -35,17 +40,16 @@ describe('Expense Tracking', () => {
 			},
 		];
 
-		tracker.addExpense(...expenses);
-		const trackedExpenses = tracker.getExpenses();
+		await tracker.addExpense(...expenses);
+		const trackedExpenses = await tracker.getExpenses();
 
 		expect(trackedExpenses).toHaveLength(2);
 		expect(trackedExpenses).toMatchObject(expenses);
 	});
 
-	test('throws error for empty expense', () => {
-		const tracker = new ExpenseTracker();
+	test('throws error for empty expense', async () => {
 		const expenses: Expense[] = [];
 
-		expect(() => tracker.addExpense(...expenses)).toThrowError(/Expense data must not be empty/);
+		expect(() => tracker.addExpense(...expenses)).rejects.toThrow(/Expense data must not be empty/);
 	});
 });

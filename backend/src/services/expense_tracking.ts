@@ -1,3 +1,5 @@
+import type { Repository } from '../repository';
+
 export interface Expense {
 	readonly id: number;
 	readonly name: string;
@@ -7,18 +9,20 @@ export interface Expense {
 
 class ExpenseTracker {
 	private expenses: Expense[];
-	constructor() {
+	private repository: Repository<Expense>;
+	constructor(repository: Repository<Expense>) {
+		this.repository = repository;
 		this.expenses = [];
 	}
 	getExpenses() {
-		return this.expenses;
+		return this.repository.list();
 	}
-	addExpense(...expenses: Expense[]) {
+	public async addExpense(...expenses: Expense[]) {
 		if (expenses.length === 0) {
 			throw new Error('Expense data must not be empty');
 		}
 
-		this.expenses.push(...expenses);
+		await this.repository.add(...expenses);
 	}
 }
 
