@@ -1,5 +1,5 @@
 import { Expense } from '../../../lib/interfaces';
-import type { Predicate, Repository } from '../repository';
+import type { Mutation, Predicate, Repository } from '../repository';
 
 type SearchPredicate = Predicate<Expense>;
 
@@ -29,6 +29,16 @@ class ExpenseTracker {
 		}
 
 		return result;
+	}
+
+	public async updateExpense(id: number, data: Partial<Expense>): Promise<void> {
+		const mutation: Mutation<Expense> = (item) => ({ ...item, ...data });
+
+		try {
+			await this.repository.update(id, mutation);
+		} catch (error: unknown) {
+			throw new Error(`Couldn't update expense. ${error}`);
+		}
 	}
 }
 

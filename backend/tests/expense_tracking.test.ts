@@ -89,4 +89,21 @@ describe('Expense Tracking', () => {
 			expect(() => tracker.searchExpenses((expense) => expense.id === 1)).rejects.toThrow(/Expense not found with given query/);
 		});
 	});
+
+	describe('Updating expenses', () => {
+		test('updates an existing expense with new details', async () => {
+			await tracker.addExpenses(generateExpenseFixture(1, 'Old Name', 100));
+
+			const newDetails = { name: 'New Name', price: 200 };
+			await tracker.updateExpense(1, newDetails);
+			const expenses = await tracker.getExpenses();
+
+			expect(expenses).toHaveLength(1);
+			expect(expenses[0]).toMatchObject(newDetails);
+		});
+
+		test('throws error when updating a missing expense', async () => {
+			expect(() => tracker.updateExpense(1, { name: 'New Name' })).rejects.toThrow(/Couldn't update expense. Error: Item with ID 1 doesn't exist/);
+		});
+	});
 });
