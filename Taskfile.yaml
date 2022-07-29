@@ -1,0 +1,39 @@
+version: '3'
+
+tasks:
+  install:
+    sources:
+      - package.json
+      - yarn.lock
+    generates:
+      - node_modules
+    cmds:
+      - yarn --frozen-lockfile --prefer-offline
+
+  format:
+    deps:
+      - install
+    cmds:
+      - npx prettier --write .
+
+  lint:
+    deps:
+      - install
+    cmds:
+      - npx prettier --check .
+
+  test:
+    deps:
+      - install
+    sources:
+      - backend/**/*.ts
+    cmds:
+      - npx vitest
+
+  mutation:
+    deps:
+      - install
+    sources:
+      - backend/**/*.ts
+    cmds:
+      - npx stryker run

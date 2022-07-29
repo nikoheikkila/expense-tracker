@@ -1,6 +1,6 @@
 {
-    "cSpell.words": [
-        "Fastify",
-        "signup"
-    ]
+	"cSpell.words": ["cmds", "Fastify", "signup", "vitest"],
+	"yaml.schemas": {
+		"https://json.schemastore.org/taskfile.json": "**Taskfile.yaml"
+	}
 }
