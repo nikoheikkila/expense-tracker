@@ -10,6 +10,8 @@ export interface Repository<T extends BaseModel> {
 	update(id: number, mutation: Mutation<T>): Promise<void>;
 }
 
+class RepositoryError extends Error {}
+
 export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
 	private items: Map<number, T>;
 	constructor() {
@@ -33,7 +35,7 @@ export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
 		const item = this.items.get(id);
 
 		if (!item) {
-			throw new Error(`Item with ID ${id} doesn't exist`);
+			throw new RepositoryError(`Item with ID ${id} doesn't exist`);
 		}
 
 		this.items.set(id, mutation(item));

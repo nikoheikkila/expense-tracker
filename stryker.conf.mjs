@@ -7,6 +7,7 @@ const config = {
 	packageManager: 'yarn',
 	reporters: ['html', 'clear-text', 'progress'],
 	testRunner: 'command',
+	timeoutFactor: 3,
 	commandRunner: {
 		command: 'npx vitest --silent --run',
 	},
