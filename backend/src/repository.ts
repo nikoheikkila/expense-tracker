@@ -8,6 +8,7 @@ export interface Repository<T extends BaseModel> {
 	list(): Promise<T[]>;
 	findBy(predicate: Predicate<T>): Promise<T[]>;
 	update(id: number, mutation: Mutation<T>): Promise<void>;
+	delete(...ids: number[]): Promise<void>;
 }
 
 class RepositoryError extends Error {}
@@ -37,5 +38,9 @@ export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
 		}
 
 		this.items.set(item.id, mutation(item));
+	}
+
+	public async delete(...ids: number[]): Promise<void> {
+		ids.forEach((id) => this.items.delete(id));
 	}
 }

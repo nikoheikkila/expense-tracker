@@ -44,6 +44,10 @@ class ExpenseTracker {
 			throw new ExpenseTransactionError(`Couldn't update expense. ${error}`);
 		}
 	}
+
+	public async deleteExpenses(...ids: number[]): Promise<void> {
+		await this.repository.delete(...ids);
+	}
 }
 
 export default ExpenseTracker;

@@ -23,7 +23,7 @@ Eventually, the application fulfils the following use cases:
     -   [x] list expenses – `GET /api/expenses => HTTP 200`
     -   [x] search expenses – `POST /api/expenses/search => HTTP 200`
     -   [x] update expense details – `POST /api/expenses/update => HTTP 200`
-    -   [ ] remove expenses – `DELETE /api/expenses/delete => HTTP 204`
+    -   [x] remove expenses – `DELETE /api/expenses/delete => HTTP 204`
 -   **Expense Reporting**
     -   [ ] fetch and cache report – `POST /api/reports/fetch => HTTP 200`
     -   [ ] delete report – `DELETE /api/reports/delete => HTTP 204`

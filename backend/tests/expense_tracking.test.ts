@@ -106,4 +106,24 @@ describe('Expense Tracking', () => {
 			expect(() => tracker.updateExpense(1, { name: 'New Name' })).rejects.toThrow(/Couldn't update expense. Error: Item with ID 1 doesn't exist/);
 		});
 	});
+
+	describe('Deleting a single expense', () => {
+		test('deletes an existing expense', async () => {
+			await tracker.addExpenses(generateExpenseFixture(1), generateExpenseFixture(2));
+
+			await tracker.deleteExpenses(1);
+			const expenses = await tracker.getExpenses();
+
+			expect(expenses).toHaveLength(1);
+		});
+
+		test('deletes multiple existing expenses', async () => {
+			await tracker.addExpenses(generateExpenseFixture(1), generateExpenseFixture(2));
+
+			await tracker.deleteExpenses(1, 2);
+			const expenses = await tracker.getExpenses();
+
+			expect(expenses).toHaveLength(0);
+		});
+	});
 });
