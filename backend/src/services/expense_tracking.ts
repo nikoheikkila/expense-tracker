@@ -22,7 +22,15 @@ class ExpenseTracker {
 		await this.repository.add(...this.validator.parseArray(expenses));
 	}
 
-	public async searchExpenses(predicate: Predicate<Expense>): Promise<Expense[]> {
+	public async searchById(id: number): Promise<Expense> {
+		try {
+			return await this.repository.get(id);
+		} catch (error: unknown) {
+			throw new MissingExpenseError(`Query failed. ${error}`);
+		}
+	}
+
+	public async searchByQuery(predicate: Predicate<Expense>): Promise<Expense[]> {
 		const result = await this.repository.findBy(predicate);
 
 		if (result.length === 0) {

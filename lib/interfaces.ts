@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export interface BaseModel {
-	id: number;
+	id?: number | undefined;
 }
 
 export const expenseSchema = z.object({
@@ -11,4 +11,4 @@ export const expenseSchema = z.object({
 	created: z.date().default(() => new Date()),
 });
 
-export type Expense = BaseModel & z.infer<typeof expenseSchema>;
+export type Expense = z.infer<typeof expenseSchema>;
