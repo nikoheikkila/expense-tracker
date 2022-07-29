@@ -1,7 +1,7 @@
 import { BaseModel } from '../../lib/interfaces';
 
 export type Predicate<T> = (item: T) => boolean;
-export type Mutation<T> = (item: T) => T;
+type Mutation<T> = (item: T) => T;
 
 export interface Repository<T extends BaseModel> {
 	add(...items: T[]): Promise<void>;
@@ -15,9 +15,11 @@ class RepositoryError extends Error {}
 
 export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
 	private items: Map<number, T>;
+
 	constructor() {
 		this.items = new Map();
 	}
+
 	public async add(...items: T[]): Promise<void> {
 		items.forEach((item) => this.items.set(item.id, item));
 	}

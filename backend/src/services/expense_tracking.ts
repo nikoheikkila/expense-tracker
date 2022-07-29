@@ -1,8 +1,6 @@
 import { Expense, expenseSchema } from '../../../lib/interfaces';
 import { Validator } from '../../../lib/validation';
-import type { Mutation, Predicate, Repository } from '../repository';
-
-type SearchPredicate = Predicate<Expense>;
+import type { Predicate, Repository } from '../repository';
 
 class MissingExpenseError extends Error {}
 class ExpenseTransactionError extends Error {}
@@ -24,7 +22,7 @@ class ExpenseTracker {
 		await this.repository.add(...this.validator.parseArray(expenses));
 	}
 
-	public async searchExpenses(predicate: SearchPredicate): Promise<Expense[]> {
+	public async searchExpenses(predicate: Predicate<Expense>): Promise<Expense[]> {
 		const result = await this.repository.findBy(predicate);
 
 		if (result.length === 0) {
@@ -35,10 +33,8 @@ class ExpenseTracker {
 	}
 
 	public async updateExpense(id: number, data: Partial<Expense>): Promise<void> {
-		const mutation: Mutation<Expense> = (item) => ({ ...item, ...data });
-
 		try {
-			await this.repository.update(id, mutation);
+			await this.repository.update(id, (item) => ({ ...item, ...data }));
 		} catch (error: unknown) {
 			throw new ExpenseTransactionError(`Couldn't update expense. ${error}`);
 		}
