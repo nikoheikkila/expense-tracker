@@ -1,0 +1,52 @@
+name: Acceptance Test Pipeline
+
+on: [push]
+
+jobs:
+  backend:
+    name: Backend Test Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: yarn
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache task checksums
+        uses: actions/cache@v3
+        with:
+          path: .task
+          key: ${{ runner.os }}-task-${{ hashFiles('Taskfile.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-task-
+            ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: task install
+
+      - name: Lint codebase
+        run: task lint
+
+      - name: Run unit tests
+        run: task test
+
+      - name: Run mutation tests
+        run: task mutation
+
+      - name: Upload results of failed tests
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: stryker-report
+          path: reports/

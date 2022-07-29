@@ -157,3 +157,6 @@ sketch
 # stryker files
 .stryker-tmp
 reports/
+
+# Taskfile
+.task/
