@@ -1,5 +1,7 @@
 import { z, Schema } from 'zod';
 
+type AnyRecord = Record<any, any>;
+
 export class Validator {
 	private readonly schema: Schema;
 
@@ -11,11 +13,19 @@ export class Validator {
 		return new Validator(schema);
 	}
 
-	public parseObject<T extends object>(object: T): T {
-		return this.schema.parse(object);
+	public parseArray<T extends AnyRecord>(array: T[]): T[] {
+		const schema = this.schema.array().min(1, { message: 'Input data must not be empty' });
+
+		return this.parse(schema, array);
 	}
 
-	public parseArray<T extends object>(array: T[]): T[] {
-		return z.array(this.schema).min(1, { message: 'Input data must not be empty' }).parse(array);
+	private parse<T extends AnyRecord>(schema: z.ZodTypeAny, object: T): T {
+		const result = schema.safeParse(object);
+
+		if (!result.success) {
+			throw result.error;
+		}
+
+		return result.data;
 	}
 }
