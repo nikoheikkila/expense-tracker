@@ -26,9 +26,7 @@ export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
 	}
 
 	public async findBy(predicate: Predicate<T>): Promise<T[]> {
-		const items = await this.list();
-
-		return items.filter(predicate);
+		return [...this.items.values()].filter(predicate);
 	}
 
 	public async update(id: number, mutation: Mutation<T>): Promise<void> {
@@ -38,6 +36,6 @@ export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
 			throw new RepositoryError(`Item with ID ${id} doesn't exist`);
 		}
 
-		this.items.set(id, mutation(item));
+		this.items.set(item.id, mutation(item));
 	}
 }
