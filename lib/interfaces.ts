@@ -1,9 +1,14 @@
+import { z } from 'zod';
+
 export interface BaseModel {
 	id: number;
 }
 
-export interface Expense extends BaseModel {
-	readonly name: string;
-	readonly price: number;
-	readonly created: Date;
-}
+export const expenseSchema = z.object({
+	id: z.number().gte(1).optional(),
+	name: z.string().min(1, { message: 'Expense name must not be empty' }),
+	price: z.number().gte(0, { message: 'Expense price must be greater than zero' }),
+	created: z.date().default(() => new Date()),
+});
+
+export type Expense = BaseModel & z.infer<typeof expenseSchema>;

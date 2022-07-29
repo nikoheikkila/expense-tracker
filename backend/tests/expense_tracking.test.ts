@@ -3,13 +3,12 @@ import { Expense } from '../../lib/interfaces';
 import { InMemoryRepository } from '../src/repository';
 import ExpenseTracker from '../src/services/expense_tracking';
 
-const generateExpenseFixture = (id: number, name: string = '', price: number = 100, extra = {}): Expense => {
+const generateExpenseFixture = (id: number, name: string = 'Item', price: number = 100): Expense => {
 	return {
 		id,
 		name,
 		price,
 		created: new Date(),
-		...extra,
 	};
 };
 
@@ -42,7 +41,7 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when adding empty expense', async () => {
-			expect(() => tracker.addExpenses()).rejects.toThrow(/Expense data must not be empty/);
+			expect(() => tracker.addExpenses()).rejects.toThrow(/Input data must not be empty/);
 		});
 	});
 
@@ -124,6 +123,20 @@ describe('Expense Tracking', () => {
 			const expenses = await tracker.getExpenses();
 
 			expect(expenses).toHaveLength(0);
+		});
+	});
+
+	describe('Validating expense data', () => {
+		test('throws validation error for empty name', async () => {
+			const invalidExpense = generateExpenseFixture(1, '');
+
+			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(/Expense name must not be empty/);
+		});
+
+		test('throws validation error for negative price', async () => {
+			const invalidExpense = generateExpenseFixture(1, 'Negative', -1);
+
+			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(/Expense price must be greater than zero/);
 		});
 	});
 });
