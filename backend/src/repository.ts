@@ -1,10 +1,9 @@
-import { BaseModel } from '../../lib/interfaces';
 import IndexedMap from '../../lib/map';
 
 export type Predicate<T> = (item: T) => boolean;
 type Mutation<T> = (item: T) => T;
 
-export interface Repository<T extends BaseModel> {
+export interface Repository<T> {
 	get(id: number): Promise<T>;
 	add(...items: T[]): Promise<void>;
 	list(): Promise<T[]>;
@@ -16,7 +15,7 @@ export interface Repository<T extends BaseModel> {
 
 class RepositoryError extends Error {}
 
-export class InMemoryRepository<T extends BaseModel> implements Repository<T> {
+export class InMemoryRepository<T> implements Repository<T> {
 	private items: IndexedMap<T>;
 
 	constructor() {

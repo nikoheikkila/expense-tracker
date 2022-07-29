@@ -26,7 +26,7 @@ describe('Expense Tracking', () => {
 
 	describe('Adding expenses', () => {
 		test('adds a single expense', async () => {
-			const expense: Expense = generateExpenseFixture();
+			const expense = generateExpenseFixture();
 
 			await tracker.addExpenses(expense);
 			const expenses = await tracker.getExpenses();
@@ -36,12 +36,11 @@ describe('Expense Tracking', () => {
 		});
 
 		test('adds multiple expenses', async () => {
-			const expenses: Expense[] = [generateExpenseFixture(), generateExpenseFixture()];
+			const expenses = [generateExpenseFixture(), generateExpenseFixture()];
 
 			await tracker.addExpenses(...expenses);
 			const trackedExpenses = await tracker.getExpenses();
 
-			expect(trackedExpenses).toHaveLength(2);
 			expect(trackedExpenses).toMatchObject(expenses);
 		});
 
@@ -63,19 +62,18 @@ describe('Expense Tracking', () => {
 
 		test('finds expense by matching the name', async () => {
 			const expectedName = /Movie Ticket/;
-			const expenses: Expense[] = [generateExpenseFixture('Groceries'), generateExpenseFixture('Movie Tickets')];
+			const [first, second] = [generateExpenseFixture('Groceries'), generateExpenseFixture('Movie Tickets')];
 
-			await tracker.addExpenses(...expenses);
-			const foundExpenses = await tracker.searchByQuery((expense) => expectedName.test(expense.name));
+			await tracker.addExpenses(first, second);
+			const [foundExpense] = await tracker.searchByQuery((expense) => expectedName.test(expense.name));
 
-			expect(foundExpenses).toHaveLength(1);
-			expect(foundExpenses[0].name).toMatch(expectedName);
+			expect(foundExpense.name).toMatch(expectedName);
 		});
 
 		test('finds expenses by comparing the price range', async () => {
 			const minimumPrice = 150;
 			const maximumPrice = 250;
-			const expenses: Expense[] = [
+			const expenses = [
 				generateExpenseFixture('Groceries', minimumPrice - 1),
 				generateExpenseFixture('Groceries', minimumPrice),
 				generateExpenseFixture('Groceries', maximumPrice),
@@ -93,20 +91,23 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when expense is not found by predicate', async () => {
-			expect(() => tracker.searchByQuery((expense) => expense.id === 1)).rejects.toThrow(/Expense not found with given query/);
+			const query = (expense: Expense) => expense.name === 'Groceries' && expense.price === 500;
+
+			tracker.addExpenses(generateExpenseFixture('Groceries', 499));
+
+			expect(() => tracker.searchByQuery(query)).rejects.toThrow(/Expense not found with given query/);
 		});
 	});
 
 	describe('Updating expenses', () => {
 		test('updates an existing expense with new details', async () => {
 			await tracker.addExpenses(generateExpenseFixture('Old Name', 100));
-
 			const newDetails = { name: 'New Name', price: 200 };
-			await tracker.updateExpense(1, newDetails);
-			const expenses = await tracker.getExpenses();
 
-			expect(expenses).toHaveLength(1);
-			expect(expenses[0]).toMatchObject(newDetails);
+			await tracker.updateExpense(1, newDetails);
+			const [expense] = await tracker.getExpenses();
+
+			expect(expense).toMatchObject(newDetails);
 		});
 
 		test('throws error when updating a missing expense', async () => {
