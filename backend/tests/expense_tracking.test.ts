@@ -1,6 +1,17 @@
 import { expect, test, describe, beforeEach } from 'vitest';
+import { Expense } from '../../lib/interfaces';
 import { InMemoryRepository } from '../src/repository';
-import ExpenseTracker, { Expense } from '../src/services/expense_tracking';
+import ExpenseTracker from '../src/services/expense_tracking';
+
+const generateExpenseFixture = (id: number, name: string = '', price: number = 100, extra = {}): Expense => {
+	return {
+		id,
+		name,
+		price,
+		created: new Date(),
+		...extra,
+	};
+};
 
 describe('Expense Tracking', () => {
 	let tracker: ExpenseTracker;
@@ -11,14 +22,9 @@ describe('Expense Tracking', () => {
 
 	describe('Adding expenses', () => {
 		test('adds a single expense', async () => {
-			const expense: Expense = {
-				id: 1,
-				name: 'Groceries',
-				price: 100,
-				created: new Date(),
-			};
+			const expense: Expense = generateExpenseFixture(1);
 
-			await tracker.addExpense(expense);
+			await tracker.addExpenses(expense);
 			const expenses = await tracker.getExpenses();
 
 			expect(expenses).toHaveLength(1);
@@ -26,22 +32,9 @@ describe('Expense Tracking', () => {
 		});
 
 		test('adds multiple expenses', async () => {
-			const expenses: Expense[] = [
-				{
-					id: 1,
-					name: 'Groceries',
-					price: 100,
-					created: new Date(),
-				},
-				{
-					id: 2,
-					name: 'Restaurant',
-					price: 200,
-					created: new Date(),
-				},
-			];
+			const expenses: Expense[] = [generateExpenseFixture(1), generateExpenseFixture(2)];
 
-			await tracker.addExpense(...expenses);
+			await tracker.addExpenses(...expenses);
 			const trackedExpenses = await tracker.getExpenses();
 
 			expect(trackedExpenses).toHaveLength(2);
@@ -49,31 +42,16 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when adding empty expense', async () => {
-			const expenses: Expense[] = [];
-
-			expect(() => tracker.addExpense(...expenses)).rejects.toThrow(/Expense data must not be empty/);
+			expect(() => tracker.addExpenses()).rejects.toThrow(/Expense data must not be empty/);
 		});
 	});
 
 	describe('Searching expenses', () => {
 		test('finds expense by ID', async () => {
 			const expectedId = 10;
-			const expenses: Expense[] = [
-				{
-					id: expectedId,
-					name: 'Groceries',
-					price: 100,
-					created: new Date(),
-				},
-				{
-					id: 20,
-					name: 'Movies',
-					price: 200,
-					created: new Date(),
-				},
-			];
+			const expenses: Expense[] = [generateExpenseFixture(expectedId), generateExpenseFixture(expectedId + 1)];
 
-			await tracker.addExpense(...expenses);
+			await tracker.addExpenses(...expenses);
 			const foundExpenses = await tracker.searchExpenses((expense) => expense.id === expectedId);
 
 			expect(foundExpenses).toHaveLength(1);
@@ -81,53 +59,30 @@ describe('Expense Tracking', () => {
 		});
 
 		test('finds expense by matching the name', async () => {
-			const expectedName = /Movie/;
-			const expenses: Expense[] = [
-				{
-					id: 10,
-					name: 'Groceries',
-					price: 100,
-					created: new Date(),
-				},
-				{
-					id: 20,
-					name: 'Movies',
-					price: 200,
-					created: new Date(),
-				},
-			];
+			const expectedName = /Movie Ticket/;
+			const expenses: Expense[] = [generateExpenseFixture(1, 'Groceries'), generateExpenseFixture(2, 'Movie Tickets')];
 
-			await tracker.addExpense(...expenses);
+			await tracker.addExpenses(...expenses);
 			const foundExpenses = await tracker.searchExpenses((expense) => expectedName.test(expense.name));
 
 			expect(foundExpenses).toHaveLength(1);
 			expect(foundExpenses[0].name).toMatch(expectedName);
 		});
 
-		test('finds expense by comparing the price range', async () => {
+		test('finds expenses by comparing the price range', async () => {
 			const minimumPrice = 150;
 			const maximumPrice = 250;
 			const expenses: Expense[] = [
-				{
-					id: 10,
-					name: 'Groceries',
-					price: 100,
-					created: new Date(),
-				},
-				{
-					id: 20,
-					name: 'Movies',
-					price: 200,
-					created: new Date(),
-				},
+				generateExpenseFixture(1, 'Groceries', minimumPrice - 1),
+				generateExpenseFixture(2, 'Groceries', minimumPrice),
+				generateExpenseFixture(3, 'Groceries', maximumPrice),
+				generateExpenseFixture(4, 'Groceries', maximumPrice + 1),
 			];
 
-			await tracker.addExpense(...expenses);
+			await tracker.addExpenses(...expenses);
 			const foundExpenses = await tracker.searchExpenses((expense) => expense.price >= minimumPrice && expense.price <= maximumPrice);
 
-			expect(foundExpenses).toHaveLength(1);
-			expect(foundExpenses[0].price).toBeGreaterThan(minimumPrice);
-			expect(foundExpenses[0].price).toBeLessThan(maximumPrice);
+			expect(foundExpenses).toHaveLength(2);
 		});
 
 		test('throws error when expense is not found by predicate', async () => {

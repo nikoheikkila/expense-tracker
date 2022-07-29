@@ -1,4 +1,4 @@
-type Predicate<T> = (item: T) => boolean;
+export type Predicate<T> = (item: T) => boolean;
 
 export interface Repository<T> {
 	add(...items: T[]): Promise<void>;
