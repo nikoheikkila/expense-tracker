@@ -1,6 +1,9 @@
+type Predicate<T> = (item: T) => boolean;
+
 export interface Repository<T> {
 	add(...items: T[]): Promise<void>;
 	list(): Promise<T[]>;
+	findBy(predicate: Predicate<T>): Promise<T[]>;
 }
 
 export class InMemoryRepository<T> implements Repository<T> {
@@ -14,5 +17,9 @@ export class InMemoryRepository<T> implements Repository<T> {
 
 	public async list(): Promise<T[]> {
 		return this.items;
+	}
+
+	public async findBy(predicate: Predicate<T>): Promise<T[]> {
+		return this.items.filter(predicate);
 	}
 }

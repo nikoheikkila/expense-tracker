@@ -7,6 +7,8 @@ export interface Expense {
 	readonly created: Date;
 }
 
+type SearchPredicate = (expense: Expense) => boolean;
+
 class ExpenseTracker {
 	private expenses: Expense[];
 	private repository: Repository<Expense>;
@@ -23,6 +25,16 @@ class ExpenseTracker {
 		}
 
 		await this.repository.add(...expenses);
+	}
+
+	public async searchExpenses(predicate: SearchPredicate) {
+		const result = await this.repository.findBy(predicate);
+
+		if (result.length === 0) {
+			throw new Error(`Expense not found with given query: ${predicate}`);
+		}
+
+		return result;
 	}
 }
 
