@@ -29,7 +29,7 @@ export class InMemoryRepository<T> implements Repository<T> {
 	}
 
 	public async list(): Promise<T[]> {
-		return [...this.items.values()];
+		return [...this.items.values()].map((item, index) => ({ ...item, id: index + 1 }));
 	}
 
 	public async findBy(predicate: Predicate<T>): Promise<T[]> {
@@ -47,5 +47,44 @@ export class InMemoryRepository<T> implements Repository<T> {
 
 	public async clear(): Promise<void> {
 		this.items.clear();
+	}
+}
+
+// Stryker disable all
+export class SQLRepository<T> implements Repository<T> {
+	get(id: number): Promise<any> {
+		throw new Error('Method not implemented.');
+	}
+	add(...items: T[]): Promise<void> {
+		throw new Error('Method not implemented.');
+	}
+	list(): Promise<T[]> {
+		return Promise.resolve([] as T[]);
+	}
+	findBy(predicate: Predicate<T>): Promise<T[]> {
+		throw new Error('Method not implemented.');
+	}
+	update(id: number, mutation: Mutation<T>): Promise<void> {
+		throw new Error('Method not implemented.');
+	}
+	delete(...ids: number[]): Promise<boolean> {
+		throw new Error('Method not implemented.');
+	}
+	clear(): Promise<void> {
+		throw new Error('Method not implemented.');
+	}
+}
+
+export class RepositoryFactory {
+	public static create<T>() {
+		const driver = process.env.DB_DRIVER || 'memory';
+		switch (driver) {
+			case 'sql':
+				return new SQLRepository<T>();
+			case 'memory':
+				return new InMemoryRepository<T>();
+			default:
+				throw new Error(`Unknown database driver: ${driver}`);
+		}
 	}
 }

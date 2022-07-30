@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { Expense } from '../../lib/interfaces';
-import { InMemoryRepository } from '../src/services/repository';
+import { Repository, RepositoryFactory } from '../src/services/repository';
 import ExpenseTracker from '../src/services/expense_tracking';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
@@ -12,11 +12,11 @@ const generateExpenseFixture = (name: string = 'Item', price: number = 100): Exp
 };
 
 describe('Expense Tracking', () => {
-	let repository: InMemoryRepository<Expense>;
+	let repository: Repository<Expense>;
 	let tracker: ExpenseTracker;
 
 	beforeAll(() => {
-		repository = new InMemoryRepository();
+		repository = RepositoryFactory.create();
 		tracker = new ExpenseTracker(repository);
 	});
 

@@ -1,6 +1,8 @@
-import { z, Schema } from 'zod';
+import { z, ZodError, ZodTypeAny, SafeParseReturnType, Schema } from 'zod';
 
 type AnyRecord = Record<any, any>;
+
+export class ValidationError extends Error {}
 
 export class Validator {
 	private readonly schema: Schema;
@@ -19,13 +21,18 @@ export class Validator {
 		return this.parse(schema, array);
 	}
 
-	private parse<T extends AnyRecord>(schema: z.ZodTypeAny, object: T): T {
-		const result = schema.safeParse(object);
+	private parse<T extends AnyRecord>(schema: ZodTypeAny, object: T): T {
+		const result: SafeParseReturnType<T, T> = schema.safeParse(object);
 
 		if (!result.success) {
-			throw result.error;
+			this.raiseValidationError(result.error);
 		}
 
 		return result.data;
+	}
+
+	private raiseValidationError(error: ZodError<any>, separator = ', '): never {
+		const errors = error.errors.map((error) => error.message).join(separator);
+		throw new ValidationError(errors);
 	}
 }
