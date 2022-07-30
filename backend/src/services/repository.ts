@@ -1,4 +1,4 @@
-import IndexedMap from '../../lib/map';
+import IndexedMap from '../../../lib/map';
 
 export type Predicate<T> = (item: T) => boolean;
 export type Mutation<T> = (item?: T | undefined) => T;
@@ -9,7 +9,7 @@ export interface Repository<T> {
 	list(): Promise<T[]>;
 	findBy(predicate: Predicate<T>): Promise<T[]>;
 	update(id: number, mutation: Mutation<T>): Promise<void>;
-	delete(...ids: number[]): Promise<void>;
+	delete(...ids: number[]): Promise<boolean>;
 	clear(): Promise<void>;
 }
 
@@ -41,8 +41,8 @@ export class InMemoryRepository<T> implements Repository<T> {
 		this.items.set(id, mutation(item));
 	}
 
-	public async delete(...ids: number[]): Promise<void> {
-		this.items.delete(...ids);
+	public async delete(...ids: number[]): Promise<boolean> {
+		return this.items.delete(...ids);
 	}
 
 	public async clear(): Promise<void> {
