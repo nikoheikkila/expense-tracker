@@ -40,9 +40,21 @@ tasks:
       - npx stryker run
 
   start:
-    desc: Start the backend server
+    desc: Start the backend server for production
     deps:
       - install
     dir: backend
+    env:
+      NODE_ENV: production
     cmds:
       - npx esno server.ts
+
+  dev:
+    desc: Start the backend server for development
+    deps:
+      - install
+    dir: backend
+    env:
+      NODE_ENV: development
+    cmds:
+      - npx esno watch server.ts
