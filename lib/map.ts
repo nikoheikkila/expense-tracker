@@ -1,6 +1,11 @@
 class IndexedMap<T> extends Map<number, T> {
-	public add(value: T): this {
-		return this.set(this.getNextKey(), value);
+	public add(...values: T[]): this {
+		values.forEach((value) => this.set(this.getNextKey(), value));
+		return this;
+	}
+
+	public delete(...keys: number[]): boolean {
+		return keys.map((key) => super.delete(key)).every(Boolean);
 	}
 
 	private getNextKey(): number {

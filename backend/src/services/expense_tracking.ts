@@ -1,6 +1,6 @@
 import { Expense, expenseSchema } from '../../../lib/interfaces';
 import { Validator } from '../../../lib/validation';
-import type { Predicate, Repository } from '../repository';
+import type { Mutation, Predicate, Repository } from '../repository';
 
 class MissingExpenseError extends Error {}
 class ExpenseTransactionError extends Error {}
@@ -23,11 +23,13 @@ class ExpenseTracker {
 	}
 
 	public async searchById(id: number): Promise<Expense> {
-		try {
-			return await this.repository.get(id);
-		} catch (error: unknown) {
-			throw new MissingExpenseError(`Query failed. ${error}`);
+		const result = await this.repository.get(id);
+
+		if (!result) {
+			throw new MissingExpenseError(`Error: Expense with ID ${id} doesn't exist`);
 		}
+
+		return result;
 	}
 
 	public async searchByQuery(predicate: Predicate<Expense>): Promise<Expense[]> {
@@ -40,12 +42,9 @@ class ExpenseTracker {
 		return result;
 	}
 
-	public async updateExpense(id: number, data: Partial<Expense>): Promise<void> {
-		try {
-			await this.repository.update(id, (item) => ({ ...item, ...data }));
-		} catch (error: unknown) {
-			throw new ExpenseTransactionError(`Couldn't update expense. ${error}`);
-		}
+	public async updateExpense(id: number, data: Expense): Promise<void> {
+		const mutation: Mutation<Expense> = (item) => ({ ...item, ...data });
+		await this.repository.update(id, mutation);
 	}
 
 	public async deleteExpenses(...ids: number[]): Promise<void> {

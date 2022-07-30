@@ -87,7 +87,7 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when expense is not found by ID', async () => {
-			expect(() => tracker.searchById(999)).rejects.toThrow(/Query failed. Error: Item with ID 999 doesn't exist/);
+			expect(() => tracker.searchById(999)).rejects.toThrow(/Error: Expense with ID 999 doesn't exist/);
 		});
 
 		test('throws error when expense is not found by predicate', async () => {
@@ -102,7 +102,7 @@ describe('Expense Tracking', () => {
 	describe('Updating expenses', () => {
 		test('updates an existing expense with new details', async () => {
 			await tracker.addExpenses(generateExpenseFixture('Old Name', 100));
-			const newDetails = { name: 'New Name', price: 200 };
+			const newDetails = generateExpenseFixture('New Name', 200);
 
 			await tracker.updateExpense(1, newDetails);
 			const [expense] = await tracker.getExpenses();
@@ -110,8 +110,13 @@ describe('Expense Tracking', () => {
 			expect(expense).toMatchObject(newDetails);
 		});
 
-		test('throws error when updating a missing expense', async () => {
-			expect(() => tracker.updateExpense(1, { name: 'New Name' })).rejects.toThrow(/Couldn't update expense. Error: Item with ID 1 doesn't exist/);
+		test('creates a new expense when updating a missing one', async () => {
+			const newDetails = generateExpenseFixture('New Name', 200);
+
+			await tracker.updateExpense(1, newDetails);
+			const [expense] = await tracker.getExpenses();
+
+			expect(expense).toMatchObject(newDetails);
 		});
 	});
 
