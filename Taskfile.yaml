@@ -38,3 +38,11 @@ tasks:
       - stryker.conf.mjs
     cmds:
       - npx stryker run
+
+  start:
+    desc: Start the backend server
+    deps:
+      - install
+    dir: backend
+    cmds:
+      - npx esno server.ts

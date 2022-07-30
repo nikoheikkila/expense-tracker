@@ -1,4 +1,4 @@
-import APIClient from './client';
+import APIClient from './src/api/client';
 
 const { API_HOST = '0.0.0.0', API_PORT = '54321', API_LOG_LEVEL = 'info' } = process.env;
 
