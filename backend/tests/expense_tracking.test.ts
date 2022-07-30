@@ -149,14 +149,23 @@ describe('Expense Tracking', () => {
 	describe('Validating expense data', () => {
 		test('throws validation error for empty name', async () => {
 			const invalidExpense = generateExpenseFixture('');
+			const expectedError = /Expense name must not be empty/;
 
-			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(/Expense name must not be empty/);
+			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
 		});
 
 		test('throws validation error for negative price', async () => {
 			const invalidExpense = generateExpenseFixture('Negative', -1);
+			const expectedError = /Expense price must be greater than zero/;
 
-			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(/Expense price must be greater than zero/);
+			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
+		});
+
+		test('throws combined validation error for multiple issues', async () => {
+			const invalidExpense = generateExpenseFixture('', -1);
+			const expectedErrors = 'Expense name must not be empty, Expense price must be greater than zero';
+
+			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedErrors);
 		});
 	});
 });
