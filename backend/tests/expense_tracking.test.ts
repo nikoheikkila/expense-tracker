@@ -120,7 +120,7 @@ describe('Expense Tracking', () => {
 		});
 	});
 
-	describe('Deleting a single expense', () => {
+	describe('Deleting expenses', () => {
 		test('deletes an existing expense', async () => {
 			await tracker.addExpenses(generateExpenseFixture(), generateExpenseFixture());
 
@@ -137,6 +137,12 @@ describe('Expense Tracking', () => {
 			const expenses = await tracker.getExpenses();
 
 			expect(expenses).toHaveLength(0);
+		});
+
+		test('throws error when some expenses cannot be deleted', async () => {
+			await tracker.addExpenses(generateExpenseFixture(), generateExpenseFixture());
+
+			expect(() => tracker.deleteExpenses(2, 999)).rejects.toThrow(/One or more expenses were not removed/);
 		});
 	});
 

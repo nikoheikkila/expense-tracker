@@ -1,7 +1,7 @@
 // @ts-check
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 const config = {
-	mutate: ['backend/src/**/*.ts'],
+	mutate: ['backend/src/services/**/*.ts', 'lib/**/*.ts'],
 	checkers: ['typescript'],
 	tsconfigFile: 'tsconfig.json',
 	packageManager: 'yarn',

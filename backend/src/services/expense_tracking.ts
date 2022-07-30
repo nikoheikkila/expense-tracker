@@ -48,7 +48,11 @@ class ExpenseTracker {
 	}
 
 	public async deleteExpenses(...ids: number[]): Promise<void> {
-		await this.repository.delete(...ids);
+		const result = await this.repository.delete(...ids);
+
+		if (!result) {
+			throw new ExpenseTransactionError(`One or more expenses were not removed`);
+		}
 	}
 }
 
