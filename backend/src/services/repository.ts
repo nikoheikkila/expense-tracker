@@ -5,10 +5,10 @@ export type Mutation<T> = (item?: T | undefined) => T;
 
 export interface Repository<T> {
 	get(id: number): Promise<T | null>;
-	add(...items: T[]): Promise<void>;
+	add(...items: T[]): Promise<T[]>;
 	list(): Promise<T[]>;
 	findBy(predicate: Predicate<T>): Promise<T[]>;
-	update(id: number, mutation: Mutation<T>): Promise<void>;
+	update(id: number, mutation: Mutation<T>): Promise<T>;
 	delete(...ids: number[]): Promise<boolean>;
 	clear(): Promise<void>;
 }
@@ -24,8 +24,10 @@ export class InMemoryRepository<T> implements Repository<T> {
 		return this.items.get(id) || null;
 	}
 
-	public async add(...items: T[]): Promise<void> {
+	public async add(...items: T[]): Promise<T[]> {
 		this.items.add(...items);
+
+		return items;
 	}
 
 	public async list(): Promise<T[]> {
@@ -36,9 +38,11 @@ export class InMemoryRepository<T> implements Repository<T> {
 		return this.list().then((values) => values.filter(predicate));
 	}
 
-	public async update(id: number, mutation: Mutation<T>): Promise<void> {
+	public async update(id: number, mutation: Mutation<T>): Promise<T> {
 		const item = this.items.get(id);
 		this.items.set(id, mutation(item));
+
+		return (await this.get(id)) as T;
 	}
 
 	public async delete(...ids: number[]): Promise<boolean> {
@@ -55,7 +59,7 @@ export class SQLRepository<T> implements Repository<T> {
 	get(id: number): Promise<any> {
 		throw new Error('Method not implemented.');
 	}
-	add(...items: T[]): Promise<void> {
+	add(...items: T[]): Promise<T[]> {
 		throw new Error('Method not implemented.');
 	}
 	list(): Promise<T[]> {
@@ -64,7 +68,7 @@ export class SQLRepository<T> implements Repository<T> {
 	findBy(predicate: Predicate<T>): Promise<T[]> {
 		throw new Error('Method not implemented.');
 	}
-	update(id: number, mutation: Mutation<T>): Promise<void> {
+	update(id: number, mutation: Mutation<T>): Promise<T> {
 		throw new Error('Method not implemented.');
 	}
 	delete(...ids: number[]): Promise<boolean> {

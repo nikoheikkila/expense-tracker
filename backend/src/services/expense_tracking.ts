@@ -18,8 +18,8 @@ class ExpenseTracker {
 		return this.repository.list();
 	}
 
-	public async addExpenses(...expenses: Expense[]): Promise<void> {
-		await this.repository.add(...this.validator.parseArray(expenses));
+	public async addExpenses(...expenses: Expense[]): Promise<Expense[]> {
+		return this.repository.add(...this.validator.parseArray(expenses));
 	}
 
 	public async searchById(id: number): Promise<Expense> {
@@ -42,9 +42,10 @@ class ExpenseTracker {
 		return result;
 	}
 
-	public async updateExpense(id: number, data: Expense): Promise<void> {
+	public async updateExpense(id: number, data: Expense): Promise<Expense> {
 		const mutation: Mutation<Expense> = (item) => ({ ...item, ...data });
-		await this.repository.update(id, mutation);
+
+		return this.repository.update(id, mutation);
 	}
 
 	public async deleteExpenses(...ids: number[]): Promise<void> {
