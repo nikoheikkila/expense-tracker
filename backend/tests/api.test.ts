@@ -1,16 +1,19 @@
+import { asValue } from 'awilix';
 import { FastifyInstance } from 'fastify';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { Expense } from '../../lib/interfaces';
 import APIClient from '../src/api/client';
+import { Repository } from '../src/services/repository';
 
 describe('API Tests', () => {
 	let app: FastifyInstance;
 
-	beforeAll(async () => {
+	beforeEach(async () => {
 		app = APIClient();
 		await app.ready();
 	});
 
-	afterAll(() => app.close());
+	afterEach(() => app.close());
 
 	describe('GET /health', () => {
 		test('returns 200 for healthy system', async () => {
@@ -91,6 +94,29 @@ describe('API Tests', () => {
 			expect(response.statusCode).toBe(400);
 			expect(response.json()).toMatchObject({
 				error: 'Bad Request: Input data must not be empty',
+			});
+		});
+
+		test('returns 500 for invalid request', async () => {
+			const expectedError = 'Unable to connect to database';
+			const fakeRepository = {
+				add: async () => {
+					throw new Error(expectedError);
+				},
+			};
+			app.diContainer.register({
+				expenseRepository: asValue(fakeRepository as unknown as Repository<Expense>),
+			});
+
+			const response = await app.inject({
+				method: 'PUT',
+				url: '/api/expenses/add',
+				payload: [{ name: 'Groceries', price: 100 }],
+			});
+
+			expect(response.statusCode).toBe(500);
+			expect(response.json()).toMatchObject({
+				error: `Internal Server Error: ${expectedError}`,
 			});
 		});
 	});

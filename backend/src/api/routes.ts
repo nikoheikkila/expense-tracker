@@ -45,7 +45,7 @@ const sendError = (response: FastifyReply, error: unknown): FastifyReply => {
 	}
 
 	if (isServerError(error)) {
-		return sendResponse(response, 500, `Internal Server Error: ${error.message}`);
+		return sendResponse(response, 500, { error: `Internal Server Error: ${error.message}`});
 	}
 
 	return sendResponse(response, 500, { error: `Unknown Error: ${error}` });

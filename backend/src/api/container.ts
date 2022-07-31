@@ -1,5 +1,5 @@
 import { diContainer, fastifyAwilixPlugin } from '@fastify/awilix';
-import { asClass, asFunction, Lifetime, LifetimeType } from 'awilix';
+import { asFunction } from 'awilix';
 import { FastifyInstance } from 'fastify';
 import { Expense } from '../../../lib/interfaces';
 import ExpenseTracker from '../services/expense_tracking';
