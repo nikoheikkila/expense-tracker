@@ -1,0 +1,14 @@
+pre-push:
+  parallel: true
+  commands:
+    packages-audit:
+      tags: security
+      run: yarn audit
+    tests:
+      run: task test
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: task format && git add -A

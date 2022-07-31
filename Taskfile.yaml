@@ -14,7 +14,7 @@ tasks:
     deps:
       - install
     cmds:
-      - npx prettier --write {{.FILES}}
+      - npx prettier --write {{.FILES | default "."}}
     vars:
       FILES:
         sh: git diff --name-only HEAD | xargs
@@ -23,7 +23,7 @@ tasks:
     deps:
       - install
     cmds:
-      - npx prettier --check {{.FILES}}
+      - npx prettier --check {{.FILES | default "."}}
     vars:
       FILES:
         sh: git diff --name-only HEAD | xargs
@@ -32,7 +32,7 @@ tasks:
     deps:
       - install
     cmds:
-      - npx vitest --changed HEAD~1
+      - npx vitest run
 
   test-watch:
     deps:
