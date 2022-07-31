@@ -9,7 +9,7 @@ const config = {
 	testRunner: 'command',
 	timeoutFactor: 3,
 	commandRunner: {
-		command: 'npx vitest --silent --run',
+		command: 'npx vitest run -c vitest.mutation.ts',
 	},
 	coverageAnalysis: 'perTest',
 };

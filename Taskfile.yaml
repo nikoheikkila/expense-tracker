@@ -28,7 +28,7 @@ tasks:
     sources:
       - backend/**/*.ts
     cmds:
-      - npx vitest
+      - npx vitest --changed HEAD~1
 
   mutation:
     deps:
