@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Expense } from '../../lib/interfaces';
 import { Repository, RepositoryFactory } from '../src/services/repository';
 import ExpenseTracker from '../src/services/expense_tracking';
@@ -15,6 +15,10 @@ describe('Expense Tracking', () => {
 	let repository: Repository<Expense>;
 	let tracker: ExpenseTracker;
 
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
 	beforeAll(() => {
 		repository = RepositoryFactory.create();
 		tracker = new ExpenseTracker(repository);
@@ -22,6 +26,7 @@ describe('Expense Tracking', () => {
 
 	afterEach(async () => {
 		await repository.clear();
+		vi.useRealTimers();
 	});
 
 	describe('Adding expenses', () => {

@@ -25,12 +25,15 @@ describe('API Tests', () => {
 
 	describe('PUT /api/expenses/add', () => {
 		test('return 201 for single expense', async () => {
+			const repository = app.diContainer.resolve('expenseRepository');
+
 			const payload = [
 				{
 					name: 'Groceries',
 					price: 100,
 				},
 			];
+			await repository.add(...payload);
 			const response = await app.inject({
 				method: 'PUT',
 				url: '/api/expenses/add',

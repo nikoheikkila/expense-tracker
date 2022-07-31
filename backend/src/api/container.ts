@@ -17,14 +17,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 
 	diContainer.register({
 		expenseRepository: asFunction(() => RepositoryFactory.create()),
-	});
-
-	app.addHook('onRequest', (request, response, done) => {
-		request.diScope.register({
-			expenseTracker: asFunction((container) => new ExpenseTracker(container.expenseRepository)),
-		});
-
-		done();
+		expenseTracker: asFunction((container) => new ExpenseTracker(container.expenseRepository)),
 	});
 
 	return app;

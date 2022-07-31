@@ -8,7 +8,7 @@ class IndexedMap<T> extends Map<number, T> {
 		return keys.map((key) => super.delete(key)).every(Boolean);
 	}
 
-	private getNextKey(): number {
+	public getNextKey(): number {
 		if (this.isEmpty()) {
 			return 1;
 		}

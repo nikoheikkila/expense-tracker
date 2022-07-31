@@ -25,9 +25,16 @@ export class InMemoryRepository<T> implements Repository<T> {
 	}
 
 	public async add(...items: T[]): Promise<T[]> {
-		this.items.add(...items);
+		const toInsert = items
+			.map((item, index) => {
+				const id = this.items.getNextKey() + index;
+				return { ...item, id };
+			})
+			.map((item) => ({ ...item, created: new Date() }));
 
-		return items;
+		this.items.add(...toInsert);
+
+		return toInsert;
 	}
 
 	public async list(): Promise<T[]> {

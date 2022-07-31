@@ -22,12 +22,11 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 			return sendResponse(response, 200);
 		})
 		.put<AddExpenses>('/api/expenses/add', async function (request, response) {
-			const { body, diScope } = request;
-			const tracker = diScope.resolve('expenseTracker');
+			const { body } = request;
+			const tracker = app.diContainer.resolve('expenseTracker');
 
 			try {
-				await tracker.addExpenses(...body);
-				const filedExpenses = await tracker.getExpenses();
+				const filedExpenses = await tracker.addExpenses(...body);
 
 				return sendResponse(response, 201, filedExpenses);
 			} catch (error: unknown) {
