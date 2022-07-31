@@ -13,7 +13,9 @@ describe('API Tests', () => {
 		await app.ready();
 	});
 
-	afterEach(() => app.close());
+	afterEach(async () => {
+		await app.close();
+	});
 
 	describe('GET /health', () => {
 		test('returns 200 for healthy system', async () => {
@@ -28,15 +30,12 @@ describe('API Tests', () => {
 
 	describe('PUT /api/expenses/add', () => {
 		test('return 201 for single expense', async () => {
-			const repository = app.diContainer.resolve('expenseRepository');
-
 			const payload = [
 				{
 					name: 'Groceries',
 					price: 100,
 				},
 			];
-			await repository.add(...payload);
 			const response = await app.inject({
 				method: 'PUT',
 				url: '/api/expenses/add',
@@ -44,15 +43,13 @@ describe('API Tests', () => {
 			});
 
 			expect(response.statusCode).toBe(201);
-			expect(response.json()).toMatchObject(
-				payload.map((expense, index) => {
-					return {
-						...expense,
-						id: index + 1,
-						created: expect.any(String),
-					};
-				}),
-			);
+			expect(response.json()).toMatchObject([
+				{
+					id: 1,
+					name: 'Groceries',
+					price: 100,
+				},
+			]);
 		});
 
 		test('returns 201 for multiple expenses', async () => {
@@ -73,15 +70,18 @@ describe('API Tests', () => {
 			});
 
 			expect(response.statusCode).toBe(201);
-			expect(response.json()).toMatchObject(
-				payload.map((expense, index) => {
-					return {
-						...expense,
-						id: index + 1,
-						created: expect.any(String),
-					};
-				}),
-			);
+			expect(response.json()).toMatchObject([
+				{
+					id: 1,
+					name: 'Groceries',
+					price: 100,
+				},
+				{
+					id: 2,
+					name: 'Gas',
+					price: 50,
+				},
+			]);
 		});
 
 		test('returns 400 for invalid request', async () => {
@@ -118,6 +118,56 @@ describe('API Tests', () => {
 			expect(response.json()).toMatchObject({
 				error: `Internal Server Error: ${expectedError}`,
 			});
+		});
+	});
+
+	describe('GET /api/expenses/list', () => {
+		let repository: Repository<Expense>;
+
+		beforeEach(() => {
+			repository = app.diContainer.resolve('expenseRepository');
+		});
+
+		test('returns 200 for empty list', async () => {
+			const response = await app.inject({
+				method: 'GET',
+				url: '/api/expenses/list',
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.json()).toMatchObject([]);
+		});
+
+		test('returns 200 with expenses', async () => {
+			const payload = [
+				{
+					name: 'Groceries',
+					price: 100,
+				},
+				{
+					name: 'Gas',
+					price: 50,
+				},
+			];
+			await repository.add(...payload);
+			const response = await app.inject({
+				method: 'GET',
+				url: '/api/expenses/list',
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.json()).toMatchObject([
+				{
+					id: 1,
+					name: 'Groceries',
+					price: 100,
+				},
+				{
+					id: 2,
+					name: 'Gas',
+					price: 50,
+				},
+			]);
 		});
 	});
 });

@@ -8,7 +8,7 @@ export default defineConfig({
 		coverage: {
 			enabled: true,
 			src: ['backend/src/**/*.ts'],
-			reporter: ['text', 'html'],
+			reporter: ['html'],
 		},
 		sequence: {
 			shuffle: true,

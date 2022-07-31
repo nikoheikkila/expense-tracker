@@ -1,5 +1,4 @@
-import { FastifyReply } from 'fastify';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { Expense } from '../../../lib/interfaces';
 import { ValidationError } from '../../../lib/validation';
 
@@ -29,6 +28,17 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 				const filedExpenses = await tracker.addExpenses(...body);
 
 				return sendResponse(response, 201, filedExpenses);
+			} catch (error: unknown) {
+				return sendError(response, error);
+			}
+		})
+		.get('/api/expenses/list', async (_, response) => {
+			const tracker = app.diContainer.resolve('expenseTracker');
+
+			try {
+				const expenses = await tracker.getExpenses();
+
+				return sendResponse(response, 200, expenses);
 			} catch (error: unknown) {
 				return sendError(response, error);
 			}

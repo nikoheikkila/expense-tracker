@@ -1,5 +1,5 @@
 import { diContainer, fastifyAwilixPlugin } from '@fastify/awilix';
-import { asFunction } from 'awilix';
+import { asFunction, Lifetime } from 'awilix';
 import { FastifyInstance } from 'fastify';
 import { Expense } from '../../../lib/interfaces';
 import ExpenseTracker from '../services/expense_tracking';
@@ -15,9 +15,18 @@ declare module '@fastify/awilix' {
 export const register = (app: FastifyInstance): FastifyInstance => {
 	app.register(fastifyAwilixPlugin);
 
+	const defaultInjectionOptions = {
+		lifetime: Lifetime.SINGLETON,
+	};
+
 	diContainer.register({
-		expenseRepository: asFunction(() => RepositoryFactory.create()),
-		expenseTracker: asFunction((container) => new ExpenseTracker(container.expenseRepository)),
+		expenseRepository: asFunction(() => RepositoryFactory.create(), {
+			...defaultInjectionOptions,
+			dispose: (repository) => repository.clear(),
+		}),
+		expenseTracker: asFunction((container) => new ExpenseTracker(container.expenseRepository), {
+			...defaultInjectionOptions,
+		}),
 	});
 
 	return app;
