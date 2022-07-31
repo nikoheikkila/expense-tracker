@@ -14,21 +14,31 @@ tasks:
     deps:
       - install
     cmds:
-      - npx prettier --write .
+      - npx prettier --write {{.FILES}}
+    vars:
+      FILES:
+        sh: git diff --name-only HEAD | xargs
 
   lint:
     deps:
       - install
     cmds:
-      - npx prettier --check .
+      - npx prettier --check {{.FILES}}
+    vars:
+      FILES:
+        sh: git diff --name-only HEAD | xargs
 
   test:
     deps:
       - install
-    sources:
-      - backend/**/*.ts
     cmds:
       - npx vitest --changed HEAD~1
+
+  test-watch:
+    deps:
+      - install
+    cmds:
+      - npx vitest watch
 
   mutation:
     deps:

@@ -1,5 +1,5 @@
 {
-	"cSpell.words": ["Awilix", "cmds", "Fastify", "signup", "vitest"],
+	"cSpell.words": ["Awilix", "cmds", "Fastify", "signup", "vars", "vitest"],
 	"yaml.schemas": {
 		"https://json.schemastore.org/taskfile.json": "**Taskfile.yaml"
 	}
