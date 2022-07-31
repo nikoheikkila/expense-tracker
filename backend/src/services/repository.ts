@@ -38,7 +38,7 @@ export class InMemoryRepository<T> implements Repository<T> {
 	}
 
 	public async list(): Promise<T[]> {
-		return [...this.items.values()].map((item, index) => ({ ...item, id: index + 1 }));
+		return [...this.items.values()];
 	}
 
 	public async findBy(predicate: Predicate<T>): Promise<T[]> {
@@ -46,10 +46,10 @@ export class InMemoryRepository<T> implements Repository<T> {
 	}
 
 	public async update(id: number, mutation: Mutation<T>): Promise<T> {
-		const item = this.items.get(id);
-		this.items.set(id, mutation(item));
+		const item = mutation(this.items.get(id));
+		this.items.set(id, item);
 
-		return (await this.get(id)) as T;
+		return item;
 	}
 
 	public async delete(...ids: number[]): Promise<boolean> {
