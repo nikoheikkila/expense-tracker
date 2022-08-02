@@ -137,12 +137,6 @@ describe('Expense Tracking', () => {
 
 			expect(expenses).toHaveLength(0);
 		});
-
-		test('throws error when some expenses cannot be deleted', async () => {
-			await repository.add(generateExpenseFixture(), generateExpenseFixture());
-
-			expect(() => tracker.deleteExpenses(2, 999)).rejects.toThrow(/One or more expenses were not removed/);
-		});
 	});
 
 	describe('Validating expense data', () => {

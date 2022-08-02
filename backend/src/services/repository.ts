@@ -1,4 +1,4 @@
-import IndexedMap from '../../../lib/map';
+import collect, { Collection } from 'collect.js';
 
 export type Predicate<T> = (item: T) => boolean;
 export type Mutation<T> = (item?: T | undefined) => T;
@@ -9,50 +9,58 @@ export interface Repository<T> {
 	list(): Promise<T[]>;
 	findBy(predicate: Predicate<T>): Promise<T[]>;
 	update(id: number, mutation: Mutation<T>): Promise<T>;
-	delete(...ids: number[]): Promise<boolean>;
+	delete(...ids: number[]): Promise<void>;
 	clear(): Promise<void>;
 }
 
 export class InMemoryRepository<T> implements Repository<T> {
-	private items: IndexedMap<T>;
+	private items: Collection<T>;
 
-	constructor() {
-		this.items = new IndexedMap();
+	constructor(...items: T[]) {
+		this.items = collect(items);
 	}
 
 	public async get(id: number): Promise<T | null> {
-		return this.items.get(id) || null;
+		return this.items.where('id', id).first();
 	}
 
 	public async add(...items: T[]): Promise<T[]> {
-		const toInsert = items.map((item, index) => ({ ...item, id: this.items.getNextKey() + index })).map((item) => ({ ...item, created: new Date() }));
+		const newItems: T[] = [];
 
-		this.items.add(...toInsert);
+		for (const item of items) {
+			const id = this.items.count() + 1;
+			const newItem = {
+				...item,
+				id,
+				created: new Date(),
+			};
 
-		return toInsert;
+			newItems.push(newItem);
+			this.items.push(newItem);
+		}
+
+		return newItems;
 	}
 
 	public async list(): Promise<T[]> {
-		return [...this.items.values()];
+		return this.items.all();
 	}
 
 	public async findBy(predicate: Predicate<T>): Promise<T[]> {
-		return this.list().then((values) => values.filter(predicate));
+		return this.items.filter(predicate).all();
 	}
 
 	public async update(id: number, mutation: Mutation<T>): Promise<T> {
-		const item = mutation(this.items.get(id));
-		this.items.set(id, item);
-
-		return item;
+		const [row] = await this.add(mutation());
+		return row;
 	}
 
-	public async delete(...ids: number[]): Promise<boolean> {
-		return this.items.delete(...ids);
+	public async delete(...ids: number[]): Promise<void> {
+		this.items = this.items.whereNotIn('id', ids);
 	}
 
 	public async clear(): Promise<void> {
-		this.items.clear();
+		this.items = collect();
 	}
 }
 
@@ -73,7 +81,7 @@ export class SQLRepository<T> implements Repository<T> {
 	update(id: number, mutation: Mutation<T>): Promise<T> {
 		throw new Error('Method not implemented.');
 	}
-	delete(...ids: number[]): Promise<boolean> {
+	delete(...ids: number[]): Promise<void> {
 		throw new Error('Method not implemented.');
 	}
 	clear(): Promise<void> {
