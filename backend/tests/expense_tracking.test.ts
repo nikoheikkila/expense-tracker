@@ -48,8 +48,22 @@ describe('Expense Tracking', () => {
 			expect(filedExpenses).toMatchObject(expenses);
 		});
 
+		test('throws error when adding expense with zero ID', async () => {
+			expect(() => tracker.addExpenses({ id: 0 } as Expense)).rejects.toThrow(/ID must be greater or equal to 1/);
+		});
+
 		test('throws error when adding empty expense', async () => {
 			expect(() => tracker.addExpenses()).rejects.toThrow(/Input data must not be empty/);
+		});
+
+		test('throws error when adding expense without name', async () => {
+			const withoutName = generateExpenseFixture('', 1);
+			expect(() => tracker.addExpenses(withoutName)).rejects.toThrow(/Expense name must not be empty/);
+		});
+
+		test('throws error when adding expense with negative price', async () => {
+			const negativePrice = generateExpenseFixture('Item', -1);
+			expect(() => tracker.addExpenses(negativePrice)).rejects.toThrow(/Expense price must be greater than zero/);
 		});
 	});
 
@@ -152,13 +166,6 @@ describe('Expense Tracking', () => {
 			const expectedError = /Expense price must be greater than zero/;
 
 			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
-		});
-
-		test('throws combined validation error for multiple issues', async () => {
-			const invalidExpense = generateExpenseFixture('', -1);
-			const expectedErrors = 'Expense name must not be empty, Expense price must be greater than zero';
-
-			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedErrors);
 		});
 	});
 });

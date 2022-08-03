@@ -1,4 +1,4 @@
-import { z, ZodError, ZodTypeAny, SafeParseReturnType, Schema } from 'zod';
+import { Schema, ZodError, ZodTypeAny } from 'zod';
 
 type AnyRecord = Record<any, any>;
 
@@ -22,17 +22,10 @@ export class Validator {
 	}
 
 	private parse<T extends AnyRecord>(schema: ZodTypeAny, object: T): T {
-		const result: SafeParseReturnType<T, T> = schema.safeParse(object);
-
-		if (!result.success) {
-			this.raiseValidationError(result.error);
+		try {
+			return schema.parse(object);
+		} catch (error: unknown) {
+			throw new ValidationError(String(error));
 		}
-
-		return result.data;
-	}
-
-	private raiseValidationError(error: ZodError<any>, separator = ', '): never {
-		const errors = error.errors.map((error) => error.message).join(separator);
-		throw new ValidationError(errors);
 	}
 }

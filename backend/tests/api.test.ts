@@ -92,9 +92,6 @@ describe('API Tests', () => {
 			});
 
 			expect(response.statusCode).toBe(400);
-			expect(response.json()).toMatchObject({
-				error: 'Bad Request: Input data must not be empty',
-			});
 		});
 
 		test('returns 500 for invalid request', async () => {
@@ -115,9 +112,6 @@ describe('API Tests', () => {
 			});
 
 			expect(response.statusCode).toBe(500);
-			expect(response.json()).toMatchObject({
-				error: `Internal Server Error: ${expectedError}`,
-			});
 		});
 	});
 

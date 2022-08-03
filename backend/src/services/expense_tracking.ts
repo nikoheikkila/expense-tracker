@@ -3,7 +3,6 @@ import { Validator } from '../../../lib/validation';
 import type { Mutation, Predicate, Repository } from './repository';
 
 class MissingExpenseError extends Error {}
-class ExpenseTransactionError extends Error {}
 
 class ExpenseTracker {
 	private repository: Repository<Expense>;
