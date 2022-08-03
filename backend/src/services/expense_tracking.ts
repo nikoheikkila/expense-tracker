@@ -1,6 +1,6 @@
 import { Expense, expenseSchema } from '../../../lib/interfaces';
 import { Validator } from '../../../lib/validation';
-import type { Mutation, Repository } from './repository';
+import type { Repository } from './repository';
 
 class MissingExpenseError extends Error {}
 
@@ -47,9 +47,13 @@ class ExpenseTracker {
 	}
 
 	public async updateExpense(id: number, data: Expense): Promise<Expense> {
-		const mutation: Mutation<Expense> = (item) => ({ ...item, ...data });
+		const result = await this.repository.update(id, data);
 
-		return this.repository.update(id, mutation);
+		if (!result) {
+			throw new MissingExpenseError(`Could not find expense to update with ID ${id}`);
+		}
+
+		return result;
 	}
 
 	public async deleteExpenses(...ids: number[]): Promise<void> {

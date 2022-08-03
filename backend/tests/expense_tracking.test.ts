@@ -145,12 +145,12 @@ describe('Expense Tracking', () => {
 			expect(expense).toMatchObject(newDetails);
 		});
 
-		test('creates a new expense when updating a missing one', async () => {
+		test('throws error when updating a missing expense', async () => {
 			const newDetails = generateExpenseFixture('New Name', 200);
 
-			const expense = await tracker.updateExpense(1, newDetails);
-
-			expect(expense).toMatchObject(newDetails);
+			expect(tracker.updateExpense(1, newDetails)).rejects.toThrow(
+				'Could not find expense to update with ID 1',
+			);
 		});
 	});
 

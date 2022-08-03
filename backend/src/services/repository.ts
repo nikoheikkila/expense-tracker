@@ -1,13 +1,11 @@
 import collect, { Collection } from 'collect.js';
 
-export type Mutation<T> = (item?: T | undefined) => T;
-
 export interface Repository<T> {
 	get(id: number): Promise<T | null>;
 	add(...items: T[]): Promise<T[]>;
 	list(): Promise<T[]>;
 	findBy(key: string, operator: Operator, value: unknown): Promise<T[]>;
-	update(id: number, mutation: Mutation<T>): Promise<T>;
+	update(id: number, mutation: Partial<T>): Promise<T | null>;
 	delete(...ids: number[]): Promise<void>;
 	clear(): Promise<void>;
 }
@@ -49,9 +47,11 @@ export class InMemoryRepository<T> implements Repository<T> {
 		return this.items.where(key, operator, value).all();
 	}
 
-	public async update(id: number, mutation: Mutation<T>): Promise<T> {
-		const [row] = await this.add(mutation());
-		return row;
+	public async update(id: number, mutation: Partial<T>): Promise<T | null> {
+		return this.items
+			.where('id', id)
+			.transform((item) => ({ ...item, ...mutation }))
+			.first();
 	}
 
 	public async delete(...ids: number[]): Promise<void> {
@@ -77,7 +77,7 @@ export class SQLRepository<T> implements Repository<T> {
 	findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
 		throw new Error('Method not implemented.');
 	}
-	update(id: number, mutation: Mutation<T>): Promise<T> {
+	update(id: number, mutation: Partial<T>): Promise<T | null> {
 		throw new Error('Method not implemented.');
 	}
 	delete(...ids: number[]): Promise<void> {
