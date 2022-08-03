@@ -90,8 +90,8 @@ export class SQLRepository<T> implements Repository<T> {
 }
 
 export class RepositoryFactory {
-	public static create<T>() {
-		const driver = process.env.DB_DRIVER || 'memory';
+	public static create<T>(driver?: string) {
+		driver = driver ?? process.env.DB_DRIVER;
 		switch (driver) {
 			case 'sql':
 				return new SQLRepository<T>();

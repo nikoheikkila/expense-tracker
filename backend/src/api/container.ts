@@ -20,7 +20,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 	};
 
 	diContainer.register({
-		expenseRepository: asFunction(() => RepositoryFactory.create(), {
+		expenseRepository: asFunction(() => RepositoryFactory.create('memory'), {
 			...defaultInjectionOptions,
 			dispose: (repository) => repository.clear(),
 		}),

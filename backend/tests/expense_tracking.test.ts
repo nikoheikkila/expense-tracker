@@ -20,7 +20,7 @@ describe('Expense Tracking', () => {
 	});
 
 	beforeAll(() => {
-		repository = RepositoryFactory.create();
+		repository = RepositoryFactory.create('memory');
 		tracker = new ExpenseTracker(repository);
 	});
 
