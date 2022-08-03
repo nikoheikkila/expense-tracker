@@ -1,6 +1,6 @@
 import { Expense, expenseSchema } from '../../../lib/interfaces';
 import { Validator } from '../../../lib/validation';
-import type { Mutation, Predicate, Repository } from './repository';
+import type { Mutation, Repository } from './repository';
 
 class MissingExpenseError extends Error {}
 
@@ -31,11 +31,16 @@ class ExpenseTracker {
 		return result;
 	}
 
-	public async searchByQuery(predicate: Predicate<Expense>): Promise<Expense[]> {
-		const result = await this.repository.findBy(predicate);
+	public async searchByQuery(
+		key: string,
+		operator: Operator,
+		value: unknown,
+	): Promise<Expense[]> {
+		const result = await this.repository.findBy(key, operator, value);
 
 		if (result.length === 0) {
-			throw new MissingExpenseError(`Expense not found with given query: ${predicate}`);
+			const query = [key, operator, value].join('');
+			throw new MissingExpenseError(`Expense not found with given query: ${query}`);
 		}
 
 		return result;

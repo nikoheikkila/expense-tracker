@@ -49,25 +49,25 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when adding expense with zero ID', async () => {
-			expect(() => tracker.addExpenses({ id: 0 } as Expense)).rejects.toThrow(
+			expect(tracker.addExpenses({ id: 0 } as Expense)).rejects.toThrow(
 				/ID must be greater or equal to 1/,
 			);
 		});
 
 		test('throws error when adding empty expense', async () => {
-			expect(() => tracker.addExpenses()).rejects.toThrow(/Input data must not be empty/);
+			expect(tracker.addExpenses()).rejects.toThrow(/Input data must not be empty/);
 		});
 
 		test('throws error when adding expense without name', async () => {
 			const withoutName = generateExpenseFixture('', 1);
-			expect(() => tracker.addExpenses(withoutName)).rejects.toThrow(
+			expect(tracker.addExpenses(withoutName)).rejects.toThrow(
 				/Expense name must not be empty/,
 			);
 		});
 
 		test('throws error when adding expense with negative price', async () => {
 			const negativePrice = generateExpenseFixture('Item', -1);
-			expect(() => tracker.addExpenses(negativePrice)).rejects.toThrow(
+			expect(tracker.addExpenses(negativePrice)).rejects.toThrow(
 				/Expense price must be greater than zero/,
 			);
 		});
@@ -87,15 +87,13 @@ describe('Expense Tracking', () => {
 		});
 
 		test('finds expense by matching the name', async () => {
-			const expectedName = /Movie Ticket/;
+			const expectedName = 'Movie Ticket';
 			const [first, second] = await repository.add(
 				generateExpenseFixture('Groceries'),
-				generateExpenseFixture('Movie Tickets'),
+				generateExpenseFixture(expectedName),
 			);
 
-			const [foundExpense] = await tracker.searchByQuery((expense) =>
-				expectedName.test(expense.name),
-			);
+			const [foundExpense] = await tracker.searchByQuery('name', '===', expectedName);
 
 			expect(foundExpense).not.toMatchObject(first);
 			expect(foundExpense).toMatchObject(second);
@@ -111,26 +109,28 @@ describe('Expense Tracking', () => {
 				generateExpenseFixture('Groceries', maximumPrice + 1),
 			);
 
-			const foundExpenses = await tracker.searchByQuery(
-				(expense) => expense.price >= minimumPrice && expense.price <= maximumPrice,
+			const moreExpensiveThanMinimum = await tracker.searchByQuery(
+				'price',
+				'>=',
+				minimumPrice,
 			);
+			const cheaperThanMaximum = await tracker.searchByQuery('price', '<=', maximumPrice);
 
-			expect(foundExpenses).toHaveLength(2);
+			expect(moreExpensiveThanMinimum).toHaveLength(3);
+			expect(cheaperThanMaximum).toHaveLength(3);
 		});
 
 		test('throws error when expense is not found by ID', async () => {
-			expect(() => tracker.searchById(999)).rejects.toThrow(
+			expect(tracker.searchById(999)).rejects.toThrow(
 				/Error: Expense with ID 999 doesn't exist/,
 			);
 		});
 
 		test('throws error when expense is not found by predicate', async () => {
-			const query = (expense: Expense) =>
-				expense.name === 'Groceries' && expense.price === 500;
 			await repository.add(generateExpenseFixture('Groceries', 499));
 
-			expect(() => tracker.searchByQuery(query)).rejects.toThrow(
-				/Expense not found with given query/,
+			expect(tracker.searchByQuery('price', '==', 500)).rejects.toThrow(
+				/Expense not found with given query: price==500/,
 			);
 		});
 	});
@@ -179,14 +179,14 @@ describe('Expense Tracking', () => {
 			const invalidExpense = generateExpenseFixture('');
 			const expectedError = /Expense name must not be empty/;
 
-			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
+			expect(tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
 		});
 
 		test('throws validation error for negative price', async () => {
 			const invalidExpense = generateExpenseFixture('Negative', -1);
 			const expectedError = /Expense price must be greater than zero/;
 
-			expect(() => tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
+			expect(tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
 		});
 	});
 });
