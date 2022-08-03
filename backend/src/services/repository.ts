@@ -1,5 +1,7 @@
 import collect, { Collection } from 'collect.js';
 
+class TransactionError extends Error {}
+
 export interface Repository<T> {
 	get(id: number): Promise<T | null>;
 	add(...items: T[]): Promise<T[]>;
@@ -48,9 +50,28 @@ export class InMemoryRepository<T> implements Repository<T> {
 	}
 
 	public async update(id: number, mutation: Partial<T>): Promise<T | null> {
+		const keysToUpdate = Object.keys(mutation);
+
+		if (keysToUpdate.length === 0) {
+			throw new TransactionError(
+				'Specify one or more allowed key-value pairs to update the expense',
+			);
+		}
+
 		return this.items
 			.where('id', id)
-			.transform((item) => ({ ...item, ...mutation }))
+			.transform((item) => {
+				if (!this.hasCompatibleKeys(item, mutation)) {
+					throw new TransactionError(
+						'Unrecognized key-value pairs used to update the expense',
+					);
+				}
+
+				return {
+					...item,
+					...mutation,
+				};
+			})
 			.first();
 	}
 
@@ -60,6 +81,19 @@ export class InMemoryRepository<T> implements Repository<T> {
 
 	public async clear(): Promise<void> {
 		this.items = collect();
+	}
+
+	private hasCompatibleKeys<T>(a: T, b: Partial<T>): boolean {
+		const aKeys = Object.keys(a);
+		const bKeys = Object.keys(b);
+
+		for (const key of bKeys) {
+			if (!aKeys.includes(key)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
 

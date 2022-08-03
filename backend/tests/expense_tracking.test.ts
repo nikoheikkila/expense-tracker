@@ -152,6 +152,24 @@ describe('Expense Tracking', () => {
 				'Could not find expense to update with ID 1',
 			);
 		});
+
+		test('throws error when updating expense with empty data', async () => {
+			await repository.add(generateExpenseFixture('Old Name', 100));
+
+			expect(tracker.updateExpense(1, {} as Expense)).rejects.toThrow(
+				/Specify one or more allowed key-value pairs to update the expense/,
+			);
+		});
+
+		test('throws error when updating expense with disallowed keys', async () => {
+			await repository.add(generateExpenseFixture('Old Name', 100));
+
+			const bogusData = { nonExistingKey: 'bogus' } as any as Expense;
+
+			expect(tracker.updateExpense(1, bogusData)).rejects.toThrow(
+				/Unrecognized key-value pairs used to update the expense/,
+			);
+		});
 	});
 
 	describe('Deleting expenses', () => {
