@@ -69,7 +69,10 @@ describe('Expense Tracking', () => {
 
 	describe('Searching expenses', () => {
 		test('finds expense by ID', async () => {
-			const [first, second] = await repository.add(generateExpenseFixture('Lamp'), generateExpenseFixture('Couch'));
+			const [first, second] = await repository.add(
+				generateExpenseFixture('Lamp'),
+				generateExpenseFixture('Couch'),
+			);
 
 			const foundExpense = await tracker.searchById(1);
 
@@ -79,7 +82,10 @@ describe('Expense Tracking', () => {
 
 		test('finds expense by matching the name', async () => {
 			const expectedName = /Movie Ticket/;
-			const [first, second] = await repository.add(generateExpenseFixture('Groceries'), generateExpenseFixture('Movie Tickets'));
+			const [first, second] = await repository.add(
+				generateExpenseFixture('Groceries'),
+				generateExpenseFixture('Movie Tickets'),
+			);
 
 			const [foundExpense] = await tracker.searchByQuery((expense) => expectedName.test(expense.name));
 
@@ -97,7 +103,9 @@ describe('Expense Tracking', () => {
 				generateExpenseFixture('Groceries', maximumPrice + 1),
 			);
 
-			const foundExpenses = await tracker.searchByQuery((expense) => expense.price >= minimumPrice && expense.price <= maximumPrice);
+			const foundExpenses = await tracker.searchByQuery(
+				(expense) => expense.price >= minimumPrice && expense.price <= maximumPrice,
+			);
 
 			expect(foundExpenses).toHaveLength(2);
 		});
