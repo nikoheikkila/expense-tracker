@@ -61,5 +61,7 @@ const sendError = (response: FastifyReply, error: unknown): FastifyReply => {
 	return sendResponse(response, 500, { error: `Unknown Error: ${error}` });
 };
 
-const isClientError = (error: unknown): error is ValidationError => error instanceof ValidationError;
-const isServerError = (error: unknown): error is Error => error instanceof Error && !isClientError(error);
+const isClientError = (error: unknown): error is ValidationError =>
+	error instanceof ValidationError;
+const isServerError = (error: unknown): error is Error =>
+	error instanceof Error && !isClientError(error);
