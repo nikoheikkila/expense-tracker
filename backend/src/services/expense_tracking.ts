@@ -3,7 +3,7 @@ import { Validator } from '../../../lib/validation';
 import type { Repository } from './repository';
 
 export class MissingExpenseError extends Error {}
-export class TransactionError extends Error {}
+export class InvalidRequestError extends Error {}
 
 class ExpenseTracker {
 	private repository: Repository<Expense>;
@@ -28,7 +28,7 @@ class ExpenseTracker {
 		const result = await this.repository.get(id);
 
 		if (!result) {
-			throw new MissingExpenseError(`Error: Expense with ID ${id} doesn't exist`);
+			throw new MissingExpenseError(`Expense with ID ${id} doesn't exist`);
 		}
 
 		return result;
@@ -68,7 +68,7 @@ const validateIncompatibleForeignKeys = (a: Expense, b: Expense): void => {
 	const theirKeys = Object.keys(b);
 
 	if (theirKeys.length === 0) {
-		throw new TransactionError(
+		throw new InvalidRequestError(
 			'Specify one or more allowed key-value pairs to update the expense',
 		);
 	}
@@ -76,7 +76,7 @@ const validateIncompatibleForeignKeys = (a: Expense, b: Expense): void => {
 	const incompatibleKeys = theirKeys.filter((key) => !ourKeys.includes(key));
 
 	if (incompatibleKeys.length > 0) {
-		throw new TransactionError(
+		throw new InvalidRequestError(
 			`Unrecognized key-value pairs (${incompatibleKeys.join(
 				', ',
 			)}) used to update the expense`,

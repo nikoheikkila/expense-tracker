@@ -256,4 +256,83 @@ describe('API Tests', () => {
 			expect(response.statusCode).toBe(400);
 		});
 	});
+
+	describe('POST /api/expenses/update', () => {
+		test('returns 200 for updated expense', async () => {
+			const expense = {
+				name: 'Groceries',
+				price: 100,
+			};
+
+			await app.diContainer.resolve('expenseRepository').add(expense);
+
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/update',
+				payload: {
+					id: 1,
+					update: {
+						name: 'Gas',
+						price: 50,
+					},
+				},
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.json()).toMatchObject({
+				id: 1,
+				old: {
+					name: 'Groceries',
+					price: 100,
+				},
+				new: {
+					name: 'Gas',
+					price: 50,
+				},
+			});
+		});
+
+		test('returns 404 when updating a missing expense', async () => {
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/update',
+				payload: {
+					id: 1,
+					update: {
+						name: 'Gas',
+					},
+				},
+			});
+
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toMatchObject({
+				error: "Not Found: Expense with ID 1 doesn't exist",
+			});
+		});
+
+		test('returns 400 when updating an expense with disallowed keys', async () => {
+			const expense = {
+				name: 'Gardening',
+				price: 100,
+			};
+
+			await app.diContainer.resolve('expenseRepository').add(expense);
+
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/update',
+				payload: {
+					id: 1,
+					update: {
+						vatPrice: 24,
+					},
+				},
+			});
+
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toMatchObject({
+				error: 'Bad Request: Unrecognized key-value pairs (vatPrice) used to update the expense',
+			});
+		});
+	});
 });

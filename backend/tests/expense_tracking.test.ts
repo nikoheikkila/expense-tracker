@@ -121,9 +121,7 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when expense is not found by ID', async () => {
-			expect(tracker.searchById(999)).rejects.toThrow(
-				/Error: Expense with ID 999 doesn't exist/,
-			);
+			expect(tracker.searchById(999)).rejects.toThrow(/Expense with ID 999 doesn't exist/);
 		});
 
 		test('throws error when expense is not found by query', async () => {
@@ -170,7 +168,7 @@ describe('Expense Tracking', () => {
 			const newDetails = generateExpenseFixture('New Name', 200);
 
 			expect(tracker.updateExpense(1, newDetails)).rejects.toThrow(
-				"Error: Expense with ID 1 doesn't exist",
+				"Expense with ID 1 doesn't exist",
 			);
 		});
 

@@ -2,7 +2,9 @@ import { FastifyInstance, FastifyReply } from 'fastify';
 import { FastifyReplyType } from 'fastify/types/type-provider';
 import { Expense } from '../../../lib/interfaces';
 import { ValidationError } from '../../../lib/validation';
-import { MissingExpenseError } from '../services/expense_tracking';
+import { InvalidRequestError, MissingExpenseError } from '../services/expense_tracking';
+
+type WithoutId<T> = Omit<T, 'id'>;
 
 interface APIError {
 	error: string;
@@ -14,7 +16,7 @@ interface HealthCheck {
 }
 
 interface AddExpenses {
-	Body: Array<Omit<Expense, 'id'>>;
+	Body: Array<WithoutId<Expense>>;
 	Reply: Array<Expense> | APIError;
 }
 
@@ -30,6 +32,18 @@ interface SearchExpenses {
 		value: unknown;
 	};
 	Reply: Array<Expense> | APIError;
+}
+
+interface UpdateExpenses {
+	Body: {
+		id: number;
+		update: WithoutId<Expense>;
+	};
+	Reply: {
+		id: number;
+		old: WithoutId<Expense>;
+		new: WithoutId<Expense>;
+	};
 }
 
 export const register = (app: FastifyInstance): FastifyInstance => {
@@ -71,6 +85,23 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 			} catch (error: unknown) {
 				return sendError(response, error);
 			}
+		})
+		.post<UpdateExpenses>('/api/expenses/update', async (request, response) => {
+			const tracker = app.diContainer.resolve('expenseTracker');
+			const { id, update } = request.body;
+
+			try {
+				const item = await tracker.searchById(id);
+				const updatedItem = await tracker.updateExpense(item.id!, update);
+
+				return sendResponse<UpdateExpenses['Reply']>(response, 200, {
+					id,
+					old: item,
+					new: updatedItem,
+				});
+			} catch (error) {
+				return sendError(response, error);
+			}
 		});
 };
 
@@ -97,6 +128,6 @@ const sendError = (response: FastifyReply, error: unknown): FastifyReply => {
 };
 
 const isClientError = (error: unknown): error is ValidationError =>
-	error instanceof ValidationError;
+	error instanceof ValidationError || error instanceof InvalidRequestError;
 const isNotFoundError = (error: unknown): error is MissingExpenseError =>
 	error instanceof MissingExpenseError;
