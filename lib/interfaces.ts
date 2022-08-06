@@ -1,10 +1,18 @@
 import { z } from 'zod';
 
-// Stryker disable all
-const operatorPattern = /^(===|==|!==|!=|<>|>|<|>=|<=)$/;
-// Stryker enable all
+export enum Operator {
+	SAME = '===',
+	EQUAL = '==',
+	NOT_SAME = '!==',
+	NOT_EQUAL = '!=',
+	NOT_EQUAL_TO = '<>',
+	GREATER = '>',
+	LESS = '<',
+	GREATER_OR_EQUAL = '>=',
+	LESS_OR_EQUAL = '<=',
+}
 
-export type Operator = '===' | '==' | '!==' | '!=' | '<>' | '>' | '<' | '>=' | '<=';
+const operatorPattern = new RegExp(`^(${Object.values(Operator).join('|')})$`);
 
 export const expenseSchema = z.object({
 	id: z.number().gte(1, 'ID must be greater or equal to 1').optional(),

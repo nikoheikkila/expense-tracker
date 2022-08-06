@@ -45,6 +45,7 @@ tasks:
       - install
     sources:
       - backend/**/*.ts
+      - lib/**/*.ts
       - stryker.conf.mjs
     cmds:
       - npx stryker run
