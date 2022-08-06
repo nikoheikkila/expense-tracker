@@ -3,6 +3,7 @@
 	"devDependencies": {
 		"@stryker-mutator/core": "^6.1.2",
 		"@stryker-mutator/typescript-checker": "^6.1.2",
+		"@types/node": "^18.6.4",
 		"c8": "^7.12.0",
 		"prettier": "^2.7.1",
 		"typescript": "^4.7.4",
