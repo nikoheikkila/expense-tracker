@@ -1,17 +1,19 @@
-import { Expense, expenseSchema } from '../../../lib/interfaces';
+import { Expense, expenseSchema, querySchema } from '../../../lib/interfaces';
 import { Validator } from '../../../lib/validation';
 import type { Repository } from './repository';
 
-class MissingExpenseError extends Error {}
-class TransactionError extends Error {}
+export class MissingExpenseError extends Error {}
+export class TransactionError extends Error {}
 
 class ExpenseTracker {
 	private repository: Repository<Expense>;
-	private validator: Validator;
+	private expenseValidator: Validator;
+	private queryValidator: Validator;
 
 	constructor(repository: Repository<Expense>) {
 		this.repository = repository;
-		this.validator = Validator.withSchema(expenseSchema);
+		this.expenseValidator = Validator.withSchema(expenseSchema);
+		this.queryValidator = Validator.withSchema(querySchema);
 	}
 
 	public async getExpenses(): Promise<Expense[]> {
@@ -19,7 +21,7 @@ class ExpenseTracker {
 	}
 
 	public async addExpenses(...expenses: Expense[]): Promise<Expense[]> {
-		return this.repository.add(...this.validator.parseArray(expenses));
+		return this.repository.add(...this.expenseValidator.parseArray(expenses));
 	}
 
 	public async searchById(id: number): Promise<Expense> {
@@ -37,6 +39,8 @@ class ExpenseTracker {
 		operator: Operator,
 		value: unknown,
 	): Promise<Expense[]> {
+		this.queryValidator.parseObject({ key, operator, value });
+
 		const result = await this.repository.findBy(key, operator, value);
 
 		if (result.length === 0) {

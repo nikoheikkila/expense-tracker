@@ -1,4 +1,4 @@
-import { Schema, ZodError, ZodTypeAny } from 'zod';
+import { Schema, ZodTypeAny } from 'zod';
 
 type AnyRecord = Record<any, any>;
 
@@ -13,6 +13,10 @@ export class Validator {
 
 	public static withSchema(schema: Schema): Validator {
 		return new Validator(schema);
+	}
+
+	public parseObject<T extends AnyRecord>(object: T): T {
+		return this.parse(this.schema, object);
 	}
 
 	public parseArray<T extends AnyRecord>(array: T[]): T[] {

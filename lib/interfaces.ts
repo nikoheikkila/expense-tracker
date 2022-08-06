@@ -1,15 +1,31 @@
 import { z } from 'zod';
 
+// Stryker disable all
+const operatorPattern = /^(===|==|!==|!=|<>|>|<|>=|<=)$/;
+// Stryker enable all
+
 export type Operator = '===' | '==' | '!==' | '!=' | '<>' | '>' | '<' | '>=' | '<=';
 
 export const expenseSchema = z.object({
-	id: z.number().gte(1, { message: 'ID must be greater or equal to 1' }).optional(),
-	name: z.string().min(1, { message: 'Expense name must not be empty' }),
-	price: z.number().gte(0, { message: 'Expense price must be greater than zero' }),
+	id: z.number().gte(1, 'ID must be greater or equal to 1').optional(),
+	name: z.string().min(1, 'Expense name must not be empty'),
+	price: z.number().gte(0, 'Expense price must be greater than zero'),
 	created: z
 		.date()
 		.default(() => new Date())
 		.optional(),
+});
+
+export const querySchema = z.object({
+	key: z.string().min(1, 'Query key must not be empty'),
+	operator: z
+		.string()
+		.min(1, 'Query operator must not be empty')
+		.regex(
+			operatorPattern,
+			`Query operator must match regular expression: ${operatorPattern.toString()}`,
+		),
+	value: z.unknown(),
 });
 
 export type Expense = z.infer<typeof expenseSchema>;

@@ -164,4 +164,96 @@ describe('API Tests', () => {
 			]);
 		});
 	});
+
+	describe('POST /api/expenses/search', () => {
+		test('returns 200 for expense found with ID', async () => {
+			const expense = {
+				name: 'Groceries',
+				price: 100,
+			};
+
+			await app.diContainer.resolve('expenseRepository').add(expense);
+
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/search',
+				payload: {
+					key: 'id',
+					operator: '==',
+					value: 1,
+				},
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.json()).toMatchObject([
+				{
+					id: 1,
+					name: 'Groceries',
+					price: 100,
+				},
+			]);
+		});
+
+		test('returns 200 for expense found with name', async () => {
+			const expense = {
+				name: 'Groceries',
+				price: 100,
+			};
+
+			await app.diContainer.resolve('expenseRepository').add(expense);
+
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/search',
+				payload: {
+					key: 'name',
+					operator: '==',
+					value: 'Groceries',
+				},
+			});
+
+			expect(response.statusCode).toBe(200);
+			expect(response.json()).toMatchObject([
+				{
+					id: 1,
+					name: 'Groceries',
+					price: 100,
+				},
+			]);
+		});
+
+		test('returns 404 for expense not found with name', async () => {
+			const expense = {
+				name: 'Groceries',
+				price: 100,
+			};
+
+			await app.diContainer.resolve('expenseRepository').add(expense);
+
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/search',
+				payload: {
+					key: 'name',
+					operator: '!=',
+					value: 'Groceries',
+				},
+			});
+
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toMatchObject({
+				error: 'Not Found: Expense not found with given query: name!=Groceries',
+			});
+		});
+
+		test('returns 400 for missing query parameters', async () => {
+			const response = await app.inject({
+				method: 'POST',
+				url: '/api/expenses/search',
+				payload: {},
+			});
+
+			expect(response.statusCode).toBe(400);
+		});
+	});
 });

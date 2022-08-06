@@ -126,12 +126,33 @@ describe('Expense Tracking', () => {
 			);
 		});
 
-		test('throws error when expense is not found by predicate', async () => {
+		test('throws error when expense is not found by query', async () => {
 			await repository.add(generateExpenseFixture('Groceries', 499));
 
 			expect(tracker.searchByQuery('price', '==', 500)).rejects.toThrow(
 				/Expense not found with given query: price==500/,
 			);
+		});
+
+		test('throws error with missing query key', async () => {
+			expect(tracker.searchByQuery('', '==', 1)).rejects.toThrow(
+				/Query key must not be empty/,
+			);
+		});
+
+		test('throws error with missing query operator', async () => {
+			const operator = '' as Operator;
+
+			expect(tracker.searchByQuery('id', operator, 1)).rejects.toThrow(
+				/Query operator must not be empty/,
+			);
+		});
+
+		test('throws error with invalid query operator', async () => {
+			const operator = '!!' as Operator;
+			const errorPattern = /Query operator must match regular expression: (.+)/;
+
+			expect(tracker.searchByQuery('id', operator, 1)).rejects.toThrow(errorPattern);
 		});
 	});
 
