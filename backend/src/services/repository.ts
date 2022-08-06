@@ -1,13 +1,11 @@
 import collect, { Collection } from 'collect.js';
 
-class TransactionError extends Error {}
-
 export interface Repository<T> {
 	get(id: number): Promise<T | null>;
 	add(...items: T[]): Promise<T[]>;
 	list(): Promise<T[]>;
 	findBy(key: string, operator: Operator, value: unknown): Promise<T[]>;
-	update(id: number, mutation: Partial<T>): Promise<T | null>;
+	update(id: number, mutation: Partial<T>): Promise<T>;
 	delete(...ids: number[]): Promise<void>;
 	clear(): Promise<void>;
 }
@@ -24,7 +22,7 @@ export class InMemoryRepository<T> implements Repository<T> {
 	}
 
 	public async add(...items: T[]): Promise<T[]> {
-		const newItems: T[] = [];
+		const insertedItems: T[] = [];
 
 		for (const item of items) {
 			const id = this.items.count() + 1;
@@ -34,11 +32,11 @@ export class InMemoryRepository<T> implements Repository<T> {
 				created: new Date(),
 			};
 
-			newItems.push(newItem);
+			insertedItems.push(newItem);
 			this.items.push(newItem);
 		}
 
-		return newItems;
+		return insertedItems;
 	}
 
 	public async list(): Promise<T[]> {
@@ -49,30 +47,11 @@ export class InMemoryRepository<T> implements Repository<T> {
 		return this.items.where(key, operator, value).all();
 	}
 
-	public async update(id: number, mutation: Partial<T>): Promise<T | null> {
-		const keysToUpdate = Object.keys(mutation);
-
-		if (keysToUpdate.length === 0) {
-			throw new TransactionError(
-				'Specify one or more allowed key-value pairs to update the expense',
-			);
-		}
-
+	public async update(id: number, mutation: Partial<T>): Promise<T> {
 		return this.items
 			.where('id', id)
-			.transform((item) => {
-				if (!this.hasCompatibleKeys(item, mutation)) {
-					throw new TransactionError(
-						'Unrecognized key-value pairs used to update the expense',
-					);
-				}
-
-				return {
-					...item,
-					...mutation,
-				};
-			})
-			.first();
+			.transform((item) => ({ ...item, ...mutation }))
+			.firstOrFail();
 	}
 
 	public async delete(...ids: number[]): Promise<void> {
@@ -81,19 +60,6 @@ export class InMemoryRepository<T> implements Repository<T> {
 
 	public async clear(): Promise<void> {
 		this.items = collect();
-	}
-
-	private hasCompatibleKeys<T>(a: T, b: Partial<T>): boolean {
-		const aKeys = Object.keys(a);
-		const bKeys = Object.keys(b);
-
-		for (const key of bKeys) {
-			if (!aKeys.includes(key)) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 }
 
@@ -111,7 +77,7 @@ export class SQLRepository<T> implements Repository<T> {
 	findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
 		throw new Error('Method not implemented.');
 	}
-	update(id: number, mutation: Partial<T>): Promise<T | null> {
+	update(id: number, mutation: Partial<T>): Promise<T> {
 		throw new Error('Method not implemented.');
 	}
 	delete(...ids: number[]): Promise<void> {

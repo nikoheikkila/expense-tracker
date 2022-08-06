@@ -149,7 +149,7 @@ describe('Expense Tracking', () => {
 			const newDetails = generateExpenseFixture('New Name', 200);
 
 			expect(tracker.updateExpense(1, newDetails)).rejects.toThrow(
-				'Could not find expense to update with ID 1',
+				"Error: Expense with ID 1 doesn't exist",
 			);
 		});
 
@@ -164,10 +164,10 @@ describe('Expense Tracking', () => {
 		test('throws error when updating expense with disallowed keys', async () => {
 			await repository.add(generateExpenseFixture('Old Name', 100));
 
-			const bogusData = { nonExistingKey: 'bogus' } as any as Expense;
+			const bogusData = { key1: 'bogus', key2: 'bogus' } as any as Expense;
 
 			expect(tracker.updateExpense(1, bogusData)).rejects.toThrow(
-				/Unrecognized key-value pairs used to update the expense/,
+				'Unrecognized key-value pairs (key1, key2) used to update the expense',
 			);
 		});
 	});
