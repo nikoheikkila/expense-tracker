@@ -1,7 +1,7 @@
 import collect, { Collection } from 'collect.js';
 
 export interface Repository<T> {
-	get(id: number): Promise<T | null>;
+	get(...ids: number[]): Promise<T[]>;
 	add(...items: T[]): Promise<T[]>;
 	list(): Promise<T[]>;
 	findBy(key: string, operator: Operator, value: unknown): Promise<T[]>;
@@ -17,8 +17,8 @@ export class InMemoryRepository<T> implements Repository<T> {
 		this.items = collect(items);
 	}
 
-	public async get(id: number): Promise<T | null> {
-		return this.items.where('id', id).first();
+	public async get(...ids: number[]): Promise<T[]> {
+		return this.items.whereIn('id', ids).all();
 	}
 
 	public async add(...items: T[]): Promise<T[]> {
@@ -65,7 +65,7 @@ export class InMemoryRepository<T> implements Repository<T> {
 
 // Stryker disable all
 export class SQLRepository<T> implements Repository<T> {
-	get(id: number): Promise<any> {
+	get(id: number): Promise<T[]> {
 		throw new Error('Method not implemented.');
 	}
 	add(...items: T[]): Promise<T[]> {

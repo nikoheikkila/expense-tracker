@@ -46,6 +46,13 @@ interface UpdateExpenses {
 	};
 }
 
+interface DeleteExpenses {
+	Body: {
+		ids: number[];
+	};
+	Reply: undefined;
+}
+
 export const register = (app: FastifyInstance): FastifyInstance => {
 	return app
 		.get<HealthCheck>('/health', async function (_, response) {
@@ -91,7 +98,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 			const { id, update } = request.body;
 
 			try {
-				const item = await tracker.searchById(id);
+				const [item] = await tracker.searchById([id]);
 				const updatedItem = await tracker.updateExpense(item.id!, update);
 
 				return sendResponse<UpdateExpenses['Reply']>(response, 200, {
@@ -99,6 +106,18 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 					old: item,
 					new: updatedItem,
 				});
+			} catch (error) {
+				return sendError(response, error);
+			}
+		})
+		.delete<DeleteExpenses>('/api/expenses/delete', async (request, response) => {
+			const tracker = app.diContainer.resolve('expenseTracker');
+			const { ids } = request.body;
+
+			try {
+				await tracker.deleteExpenses(...ids);
+
+				return sendResponse<DeleteExpenses['Reply']>(response, 204);
 			} catch (error) {
 				return sendError(response, error);
 			}

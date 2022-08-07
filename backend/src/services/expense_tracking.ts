@@ -24,11 +24,11 @@ class ExpenseTracker {
 		return this.repository.add(...this.expenseValidator.parseArray(expenses));
 	}
 
-	public async searchById(id: number): Promise<Expense> {
-		const result = await this.repository.get(id);
+	public async searchById(ids: number[]): Promise<Expense[]> {
+		const result = await this.repository.get(...ids);
 
-		if (!result) {
-			throw new MissingExpenseError(`Expense with ID ${id} doesn't exist`);
+		if (result.length === 0) {
+			throw new MissingExpenseError(`Expenses with IDs (${ids.join(', ')}) do not exist`);
 		}
 
 		return result;
@@ -52,13 +52,19 @@ class ExpenseTracker {
 	}
 
 	public async updateExpense(id: number, data: Expense): Promise<Expense> {
-		const item = await this.searchById(id);
+		const [item] = await this.searchById([id]);
 		validateIncompatibleForeignKeys(item, data);
 
 		return this.repository.update(id, data);
 	}
 
 	public async deleteExpenses(...ids: number[]): Promise<void> {
+		if (ids.length === 0) {
+			throw new InvalidRequestError('List of expense IDs to delete cannot be empty');
+		}
+
+		await this.searchById(ids);
+
 		await this.repository.delete(...ids);
 	}
 }

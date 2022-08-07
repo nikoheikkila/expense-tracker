@@ -306,7 +306,7 @@ describe('API Tests', () => {
 
 			expect(response.statusCode).toBe(404);
 			expect(response.json()).toMatchObject({
-				error: "Not Found: Expense with ID 1 doesn't exist",
+				error: 'Not Found: Expenses with IDs (1) do not exist',
 			});
 		});
 
@@ -332,6 +332,64 @@ describe('API Tests', () => {
 			expect(response.statusCode).toBe(400);
 			expect(response.json()).toMatchObject({
 				error: 'Bad Request: Unrecognized key-value pairs (vatPrice) used to update the expense',
+			});
+		});
+	});
+
+	describe('DELETE /api/expenses/delete', () => {
+		test('returns 204 without content for deleted expenses', async () => {
+			const expenses = [
+				{
+					name: 'Groceries',
+					price: 100,
+				},
+				{
+					name: 'Gas',
+					price: 50,
+				},
+			];
+
+			await app.diContainer.resolve('expenseRepository').add(...expenses);
+
+			const response = await app.inject({
+				method: 'DELETE',
+				url: '/api/expenses/delete',
+				payload: {
+					ids: [1, 2],
+				},
+			});
+
+			expect(response.statusCode).toBe(204);
+			expect(response.body).toBe('');
+		});
+
+		test('returns 400 for empty list of expense IDs', async () => {
+			const response = await app.inject({
+				method: 'DELETE',
+				url: '/api/expenses/delete',
+				payload: {
+					ids: [],
+				},
+			});
+
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toMatchObject({
+				error: 'Bad Request: List of expense IDs to delete cannot be empty',
+			});
+		});
+
+		test('returns 400 when attempting to delete missing expenses', async () => {
+			const response = await app.inject({
+				method: 'DELETE',
+				url: '/api/expenses/delete',
+				payload: {
+					ids: [1, 2, 3],
+				},
+			});
+
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toMatchObject({
+				error: 'Not Found: Expenses with IDs (1, 2, 3) do not exist',
 			});
 		});
 	});

@@ -80,10 +80,10 @@ describe('Expense Tracking', () => {
 				generateExpenseFixture('Couch'),
 			);
 
-			const foundExpense = await tracker.searchById(1);
+			const [firstFound] = await tracker.searchById([1]);
 
-			expect(foundExpense).toMatchObject(first);
-			expect(foundExpense).not.toMatchObject(second);
+			expect(firstFound).toMatchObject(first);
+			expect(firstFound).not.toMatchObject(second);
 		});
 
 		test('finds expense by matching the name', async () => {
@@ -121,7 +121,9 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when expense is not found by ID', async () => {
-			expect(tracker.searchById(999)).rejects.toThrow(/Expense with ID 999 doesn't exist/);
+			expect(tracker.searchById([999])).rejects.toThrow(
+				/Expenses with IDs \(999\) do not exist/,
+			);
 		});
 
 		test('throws error when expense is not found by query', async () => {
@@ -168,7 +170,7 @@ describe('Expense Tracking', () => {
 			const newDetails = generateExpenseFixture('New Name', 200);
 
 			expect(tracker.updateExpense(1, newDetails)).rejects.toThrow(
-				"Expense with ID 1 doesn't exist",
+				'Expenses with IDs (1) do not exist',
 			);
 		});
 
