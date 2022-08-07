@@ -15,7 +15,7 @@
 		"collect.js": "^4.34.3",
 		"esno": "^0.16.3",
 		"fastify": "^4.3.0",
-		"fastify-plugin": "^4.0.0",
+		"fastify-plugin": "^4.1.0",
 		"zod": "^3.17.10"
 	}
 }
