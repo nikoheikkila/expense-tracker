@@ -1,5 +1,17 @@
 version: '3'
 
+env:
+  API_HOST: 0.0.0.0
+  API_LOG_LEVEL: info
+  API_PORT: 54321
+  DB_CLIENT: pg
+  DB_DATABASE: expense_tracker
+  DB_HOST: localhost
+  DB_PASSWORD: secret
+  DB_PORT: 54320
+  DB_USER: expense_tracker
+  DB_VERSION: 14
+
 tasks:
   install:
     sources:
@@ -10,39 +22,44 @@ tasks:
     cmds:
       - yarn --frozen-lockfile --prefer-offline
 
+  docker:
+    cmds:
+      - docker-compose up -d
+
   format:
     deps:
       - install
     cmds:
-      - npx prettier --write {{.FILES | default "."}}
-    vars:
-      FILES:
-        sh: git diff --name-only HEAD | xargs
+      - npx prettier --write .
 
   lint:
     deps:
       - install
     cmds:
-      - npx prettier --check {{.FILES | default "."}}
-    vars:
-      FILES:
-        sh: git diff --name-only HEAD | xargs
+      - npx prettier --check .
 
   test:
     deps:
       - install
+      - docker
     cmds:
       - npx vitest run
+    env:
+      NODE_ENV: test
 
   test-watch:
     deps:
       - install
+      - docker
     cmds:
       - npx vitest watch
+    env:
+      NODE_ENV: test
 
   mutation:
     deps:
       - install
+      - docker
     sources:
       - backend/**/*.ts
       - lib/**/*.ts
@@ -54,6 +71,7 @@ tasks:
     desc: Start the backend server for production
     deps:
       - install
+      - docker
     dir: backend
     env:
       NODE_ENV: production
@@ -64,8 +82,16 @@ tasks:
     desc: Start the backend server for development
     deps:
       - install
+      - docker
     dir: backend
     env:
       NODE_ENV: development
     cmds:
       - npx esno watch server.ts
+
+  migrate:make:
+    desc: Create a new database migration
+    deps:
+      - install
+    cmds:
+      - npx ts-node ./node_modules/.bin/knex migrate:make --knexfile backend/knexfile.ts -x ts {{.CLI_ARGS}}

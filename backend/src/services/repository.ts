@@ -1,4 +1,6 @@
 import collect, { Collection } from 'collect.js';
+import knex, { Knex } from 'knex';
+import config from '../../config';
 
 export interface Repository<T> {
 	get(...ids: number[]): Promise<T[]>;
@@ -65,26 +67,32 @@ export class InMemoryRepository<T> implements Repository<T> {
 
 // Stryker disable all
 export class SQLRepository<T> implements Repository<T> {
-	get(id: number): Promise<T[]> {
-		throw new Error('Method not implemented.');
+	constructor(private readonly connection: Knex, private readonly table: string) {}
+
+	private get query(): Knex.QueryBuilder {
+		return this.connection(this.table);
 	}
-	add(...items: T[]): Promise<T[]> {
-		throw new Error('Method not implemented.');
+
+	public async get(id: number): Promise<T[]> {
+		return this.query.where({ id }).first();
 	}
-	list(): Promise<T[]> {
-		return Promise.resolve([] as T[]);
+	public async add(...items: T[]): Promise<T[]> {
+		return this.query.insert(items).returning('*');
 	}
-	findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
-		throw new Error('Method not implemented.');
+	public async list(): Promise<T[]> {
+		return this.query.select('*');
 	}
-	update(id: number, mutation: Partial<T>): Promise<T> {
-		throw new Error('Method not implemented.');
+	public async findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
+		return this.query.where(key as any, operator, value as any).select('*');
 	}
-	delete(...ids: number[]): Promise<void> {
-		throw new Error('Method not implemented.');
+	public async update(id: number, mutation: Partial<T>): Promise<T> {
+		return this.query.update(mutation).where({ id }).returning('*').first();
 	}
-	clear(): Promise<void> {
-		throw new Error('Method not implemented.');
+	public async delete(...ids: number[]): Promise<void> {
+		return this.query.whereIn('id', ids).delete();
+	}
+	public async clear(): Promise<void> {
+		return this.query.truncate();
 	}
 }
 
@@ -93,11 +101,23 @@ export class RepositoryFactory {
 		driver = driver ?? process.env.DB_DRIVER;
 		switch (driver) {
 			case 'sql':
-				return new SQLRepository<T>();
+				return this.createSQLRepository<T>();
 			case 'memory':
-				return new InMemoryRepository<T>();
+				return this.createInMemoryRepository<T>();
 			default:
 				throw new Error(`Unknown database driver: ${driver}`);
 		}
+	}
+
+	private static createInMemoryRepository<T>(): InMemoryRepository<T> {
+		return new InMemoryRepository<T>();
+	}
+
+	private static createSQLRepository<T>(): SQLRepository<T> {
+		const table = 'expenses';
+		const { database } = config();
+		const connection = knex(database);
+
+		return new SQLRepository<T>(connection, table);
 	}
 }
