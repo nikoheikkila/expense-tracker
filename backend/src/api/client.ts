@@ -1,7 +1,6 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from 'fastify';
-import { fastifyAwilixPlugin } from '@fastify/awilix';
-import * as Routes from './routes';
 import * as DIContainer from './container';
+import * as Routes from './routes';
 
 const APIClient = (options: FastifyServerOptions = {}): FastifyInstance => {
 	const app = fastify(options);
