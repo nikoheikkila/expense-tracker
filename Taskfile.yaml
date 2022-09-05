@@ -62,6 +62,7 @@ tasks:
       - backend/tests/**/*.ts
       - vitest.config.ts
     cmds:
+      - defer: docker-compose down
       - npx vitest run --dir backend/tests/integration
 
   test:mutation:
@@ -69,6 +70,7 @@ tasks:
       - install
       - docker
     cmds:
+      - defer: docker-compose down
       - npx stryker run
 
   start:
