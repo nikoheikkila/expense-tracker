@@ -113,7 +113,7 @@ export class ExpenseRepository implements IRepository<Expense> {
 		await this.query.delete().whereInIds(ids).execute();
 	}
 	public async clear(): Promise<void> {
-		await AppDataSource.synchronize(true);
+		return;
 	}
 }
 

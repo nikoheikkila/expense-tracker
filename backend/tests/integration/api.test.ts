@@ -11,13 +11,13 @@ describe('API Tests', () => {
 
 	beforeEach(async () => {
 		await AppDataSource.initialize();
-		await AppDataSource.synchronize();
 		app = APIClient();
 		await app.ready();
 	});
 
 	afterEach(async () => {
 		await app.close();
+		await AppDataSource.synchronize(true);
 		await AppDataSource.destroy();
 	});
 
