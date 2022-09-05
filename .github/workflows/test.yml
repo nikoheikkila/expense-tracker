@@ -41,10 +41,13 @@ jobs:
         run: task lint
 
       - name: Run unit tests
-        run: task test
+        run: task test:unit
+
+      - name: Run unit tests
+        run: task test:integration
 
       - name: Run mutation tests
-        run: task mutation
+        run: task test:mutation
 
       - name: Upload results of failed tests
         uses: actions/upload-artifact@v2

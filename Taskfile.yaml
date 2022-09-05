@@ -39,31 +39,35 @@ tasks:
       - npx prettier --check .
 
   test:
+    cmds:
+      - task: test:unit
+      - task: test:integration
+
+  test:unit:
     deps:
       - install
-      - docker
+    sources:
+      - backend/src/**/*.ts
+      - backend/tests/**/*.ts
+      - vitest.config.ts
     cmds:
-      - npx vitest run
-    env:
-      NODE_ENV: test
+      - npx vitest run --dir backend/tests/unit
 
-  test-watch:
-    deps:
-      - install
-      - docker
-    cmds:
-      - npx vitest watch
-    env:
-      NODE_ENV: test
-
-  mutation:
+  test:integration:
     deps:
       - install
       - docker
     sources:
-      - backend/**/*.ts
-      - lib/**/*.ts
-      - stryker.conf.mjs
+      - backend/src/**/*.ts
+      - backend/tests/**/*.ts
+      - vitest.config.ts
+    cmds:
+      - npx vitest run --dir backend/tests/integration
+
+  test:mutation:
+    deps:
+      - install
+      - docker
     cmds:
       - npx stryker run
 

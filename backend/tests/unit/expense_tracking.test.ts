@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { Expense } from '../../lib/interfaces';
-import ExpenseTracker from '../src/services/expense_tracking';
-import { IRepository, RepositoryFactory } from '../src/services/repository';
+import { Expense } from '../../../lib/interfaces';
+import ExpenseTracker from '../../src/services/expense_tracking';
+import { IRepository, RepositoryFactory } from '../../src/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
 	return {
