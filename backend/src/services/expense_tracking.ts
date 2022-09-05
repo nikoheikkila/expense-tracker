@@ -1,16 +1,16 @@
 import { Expense, expenseSchema, querySchema } from '../../../lib/interfaces';
 import { Validator } from '../../../lib/validation';
-import type { Repository } from './repository';
+import type { IRepository } from './repository';
 
 export class MissingExpenseError extends Error {}
 export class InvalidRequestError extends Error {}
 
 class ExpenseTracker {
-	private repository: Repository<Expense>;
+	private repository: IRepository<Expense>;
 	private expenseValidator: Validator;
 	private queryValidator: Validator;
 
-	constructor(repository: Repository<Expense>) {
+	constructor(repository: IRepository<Expense>) {
 		this.repository = repository;
 		this.expenseValidator = Validator.withSchema(expenseSchema);
 		this.queryValidator = Validator.withSchema(querySchema);

@@ -1,20 +1,24 @@
 import { asValue } from 'awilix';
 import { FastifyInstance } from 'fastify';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Expense } from '../../lib/interfaces';
+import { AppDataSource } from '../config';
 import APIClient from '../src/api/client';
-import { Repository } from '../src/services/repository';
+import { IRepository } from '../src/services/repository';
 
 describe('API Tests', () => {
 	let app: FastifyInstance;
 
 	beforeEach(async () => {
+		await AppDataSource.initialize();
+		await AppDataSource.synchronize();
 		app = APIClient();
 		await app.ready();
 	});
 
 	afterEach(async () => {
 		await app.close();
+		await AppDataSource.destroy();
 	});
 
 	describe('GET /health', () => {
@@ -102,7 +106,7 @@ describe('API Tests', () => {
 				},
 			};
 			app.diContainer.register({
-				expenseRepository: asValue(fakeRepository as unknown as Repository<Expense>),
+				expenseRepository: asValue(fakeRepository as unknown as IRepository<Expense>),
 			});
 
 			const response = await app.inject({
@@ -116,7 +120,7 @@ describe('API Tests', () => {
 	});
 
 	describe('GET /api/expenses/list', () => {
-		let repository: Repository<Expense>;
+		let repository: IRepository<Expense>;
 
 		beforeEach(() => {
 			repository = app.diContainer.resolve('expenseRepository');
@@ -179,12 +183,11 @@ describe('API Tests', () => {
 				url: '/api/expenses/search',
 				payload: {
 					key: 'id',
-					operator: '==',
+					operator: '=',
 					value: 1,
 				},
 			});
 
-			expect(response.statusCode).toBe(200);
 			expect(response.json()).toMatchObject([
 				{
 					id: 1,
@@ -192,6 +195,7 @@ describe('API Tests', () => {
 					price: 100,
 				},
 			]);
+			expect(response.statusCode).toBe(200);
 		});
 
 		test('returns 200 for expense found with name', async () => {
@@ -207,12 +211,11 @@ describe('API Tests', () => {
 				url: '/api/expenses/search',
 				payload: {
 					key: 'name',
-					operator: '==',
+					operator: '=',
 					value: 'Groceries',
 				},
 			});
 
-			expect(response.statusCode).toBe(200);
 			expect(response.json()).toMatchObject([
 				{
 					id: 1,
@@ -220,6 +223,7 @@ describe('API Tests', () => {
 					price: 100,
 				},
 			]);
+			expect(response.statusCode).toBe(200);
 		});
 
 		test('returns 404 for expense not found with name', async () => {
@@ -278,18 +282,20 @@ describe('API Tests', () => {
 				},
 			});
 
-			expect(response.statusCode).toBe(200);
 			expect(response.json()).toMatchObject({
 				id: 1,
 				old: {
+					id: 1,
 					name: 'Groceries',
 					price: 100,
 				},
 				new: {
+					id: 1,
 					name: 'Gas',
 					price: 50,
 				},
 			});
+			expect(response.statusCode).toBe(200);
 		});
 
 		test('returns 404 when updating a missing expense', async () => {

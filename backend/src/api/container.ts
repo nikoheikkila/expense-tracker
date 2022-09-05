@@ -1,13 +1,14 @@
 import { diContainer, fastifyAwilixPlugin } from '@fastify/awilix';
-import { asFunction, Lifetime } from 'awilix';
+import { asFunction, asValue, Lifetime } from 'awilix';
 import { FastifyInstance } from 'fastify';
-import { Expense } from '../../../lib/interfaces';
+import config from '../../config';
+import { Expense } from '../domain/entities';
 import ExpenseTracker from '../services/expense_tracking';
-import { Repository, RepositoryFactory } from '../services/repository';
+import { IRepository, RepositoryFactory } from '../services/repository';
 
 declare module '@fastify/awilix' {
 	interface Cradle {
-		expenseRepository: Repository<Expense>;
+		expenseRepository: IRepository<Expense>;
 		expenseTracker: ExpenseTracker;
 	}
 }
@@ -20,7 +21,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 	};
 
 	diContainer.register({
-		expenseRepository: asFunction(() => RepositoryFactory.create('memory'), {
+		expenseRepository: asFunction(() => RepositoryFactory.withSQLDatabase(Expense), {
 			...defaultInjectionOptions,
 			dispose: (repository) => repository.clear(),
 		}),

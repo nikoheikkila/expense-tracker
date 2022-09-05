@@ -1,8 +1,9 @@
 import collect, { Collection } from 'collect.js';
-import knex, { Knex } from 'knex';
-import config from '../../config';
+import { Expense } from '../domain/entities';
+import { AppDataSource } from '../../config';
+import { EntityTarget, Repository, SelectQueryBuilder } from 'typeorm';
 
-export interface Repository<T> {
+export interface IRepository<T> {
 	get(...ids: number[]): Promise<T[]>;
 	add(...items: T[]): Promise<T[]>;
 	list(): Promise<T[]>;
@@ -12,7 +13,7 @@ export interface Repository<T> {
 	clear(): Promise<void>;
 }
 
-export class InMemoryRepository<T> implements Repository<T> {
+export class InMemoryRepository<T> implements IRepository<T> {
 	private items: Collection<T>;
 
 	constructor(...items: T[]) {
@@ -66,58 +67,62 @@ export class InMemoryRepository<T> implements Repository<T> {
 }
 
 // Stryker disable all
-export class SQLRepository<T> implements Repository<T> {
-	constructor(private readonly connection: Knex, private readonly table: string) {}
+export class ExpenseRepository implements IRepository<Expense> {
+	private readonly repository: Repository<Expense>;
+	private readonly tableName: string = 'expense';
 
-	private get query(): Knex.QueryBuilder {
-		return this.connection(this.table);
+	constructor(repository: Repository<Expense>) {
+		this.repository = repository;
 	}
 
-	public async get(id: number): Promise<T[]> {
-		return this.query.where({ id }).first();
+	private get query(): SelectQueryBuilder<Expense> {
+		return this.repository.createQueryBuilder(this.tableName);
 	}
-	public async add(...items: T[]): Promise<T[]> {
-		return this.query.insert(items).returning('*');
+
+	public async get(...ids: number[]): Promise<Expense[]> {
+		return this.query.whereInIds(ids).getMany();
 	}
-	public async list(): Promise<T[]> {
-		return this.query.select('*');
+	public async add(...items: Expense[]): Promise<Expense[]> {
+		const result = await this.query
+			.insert()
+			.into(this.tableName)
+			.values(items)
+			.returning(['id', 'name', 'price'])
+			.execute();
+
+		return result.raw;
 	}
-	public async findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
-		return this.query.where(key as any, operator, value as any).select('*');
+	public async list(): Promise<Expense[]> {
+		return this.query.getMany();
 	}
-	public async update(id: number, mutation: Partial<T>): Promise<T> {
-		return this.query.update(mutation).where({ id }).returning('*').first();
+	public async findBy(key: string, operator: Operator, value: unknown): Promise<Expense[]> {
+		return this.query.where(`${this.tableName}.${key} ${operator} :value`, { value }).getMany();
+	}
+	public async update(id: number, mutation: Partial<Expense>): Promise<Expense> {
+		const result = await this.query
+			.update(this.tableName)
+			.set(mutation)
+			.where('id = :id', { id })
+			.returning(['id', 'name', 'price'])
+			.execute();
+
+		return result.raw[0];
 	}
 	public async delete(...ids: number[]): Promise<void> {
-		return this.query.whereIn('id', ids).delete();
+		await this.query.delete().whereInIds(ids).execute();
 	}
 	public async clear(): Promise<void> {
-		return this.query.truncate();
+		await AppDataSource.synchronize(true);
 	}
 }
 
 export class RepositoryFactory {
-	public static create<T>(driver?: string) {
-		driver = driver ?? process.env.DB_DRIVER;
-		switch (driver) {
-			case 'sql':
-				return this.createSQLRepository<T>();
-			case 'memory':
-				return this.createInMemoryRepository<T>();
-			default:
-				throw new Error(`Unknown database driver: ${driver}`);
-		}
-	}
-
-	private static createInMemoryRepository<T>(): InMemoryRepository<T> {
+	public static withInMemoryDatabase<T>(): InMemoryRepository<T> {
 		return new InMemoryRepository<T>();
 	}
 
-	private static createSQLRepository<T>(): SQLRepository<T> {
-		const table = 'expenses';
-		const { database } = config();
-		const connection = knex(database);
-
-		return new SQLRepository<T>(connection, table);
+	public static withSQLDatabase(entity: EntityTarget<Expense>): ExpenseRepository {
+		const repository = AppDataSource.getRepository<Expense>(entity);
+		return new ExpenseRepository(repository);
 	}
 }

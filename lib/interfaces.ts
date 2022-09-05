@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export enum Operator {
 	SAME = '===',
-	EQUAL = '==',
+	EQUAL = '=',
 	NOT_SAME = '!==',
 	NOT_EQUAL = '!=',
 	NOT_EQUAL_TO = '<>',

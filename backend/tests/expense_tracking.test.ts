@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Expense } from '../../lib/interfaces';
 import ExpenseTracker from '../src/services/expense_tracking';
-import { Repository, RepositoryFactory } from '../src/services/repository';
+import { IRepository, RepositoryFactory } from '../src/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
 	return {
@@ -12,7 +12,7 @@ const generateExpenseFixture = (name: string = 'Item', price: number = 100): Exp
 };
 
 describe('Expense Tracking', () => {
-	let repository: Repository<Expense>;
+	let repository: IRepository<Expense>;
 	let tracker: ExpenseTracker;
 
 	beforeEach(() => {
@@ -20,7 +20,7 @@ describe('Expense Tracking', () => {
 	});
 
 	beforeAll(() => {
-		repository = RepositoryFactory.create('memory');
+		repository = RepositoryFactory.withInMemoryDatabase();
 		tracker = new ExpenseTracker(repository);
 	});
 
@@ -129,8 +129,8 @@ describe('Expense Tracking', () => {
 		test('throws error when expense is not found by query', async () => {
 			await repository.add(generateExpenseFixture('Groceries', 499));
 
-			expect(tracker.searchByQuery('price', '==', 500)).rejects.toThrow(
-				/Expense not found with given query: price==500/,
+			expect(tracker.searchByQuery('price', '=', 500)).rejects.toThrow(
+				/Expense not found with given query: price=500/,
 			);
 		});
 

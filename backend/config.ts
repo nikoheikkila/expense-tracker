@@ -1,27 +1,16 @@
-import { Knex } from 'knex';
-
-export interface AppConfig {
-	database: Knex.Config;
-}
+import { DataSource } from 'typeorm';
+import { Expense } from './src/domain/entities';
 
 const env = (key: string, fallback: string): string => process.env[key] ?? fallback;
 
-const config = (): AppConfig => ({
-	database: {
-		client: env('DB_CLIENT', 'pg'),
-		version: env('DB_VERSION', '14'),
-		connection: {
-			host: env('DB_HOST', '127.0.0.1'),
-			port: Number.parseInt(env('DB_PORT', '5432')),
-			user: env('DB_USER', 'postgres'),
-			password: env('DB_PASSWORD', 'postgres'),
-			database: env('DB_DATABASE', 'database'),
-		},
-		pool: {
-			min: Number.parseInt(env('DB_POOL_MIN', '2')),
-			max: Number.parseInt(env('DB_POOL_MAX', '10')),
-		},
-	},
+export const AppDataSource = new DataSource({
+	type: 'postgres',
+	host: env('DB_HOST', 'localhost'),
+	port: Number.parseInt(env('DB_PORT', '5432')),
+	username: env('DB_USER', 'postgres'),
+	password: env('DB_PASSWORD', 'postgres'),
+	database: env('DB_NAME', 'postgres'),
+	entities: [Expense],
+	synchronize: true,
+	logging: false,
 });
-
-export default config;

@@ -16,8 +16,5 @@ export default defineConfig({
 		cache: {
 			dir: '/tmp/.vitest',
 		},
-		onConsoleLog(log, type) {
-			return false;
-		},
 	},
 });
