@@ -1,7 +1,7 @@
 import { asValue } from 'awilix';
 import { FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { Expense } from '../../../lib/interfaces';
+import { Expense } from '../../src/domain/entities';
 import { AppDataSource } from '../../config';
 import APIClient from '../../src/api/client';
 import { IRepository } from '../../src/services/repository';

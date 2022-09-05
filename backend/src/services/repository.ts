@@ -2,10 +2,11 @@ import collect, { Collection } from 'collect.js';
 import { Expense } from '../domain/entities';
 import { AppDataSource } from '../../config';
 import { EntityTarget, Repository, SelectQueryBuilder } from 'typeorm';
+import { Operator } from '../../../lib/interfaces';
 
 export interface IRepository<T> {
 	get(...ids: number[]): Promise<T[]>;
-	add(...items: T[]): Promise<T[]>;
+	add(...items: Partial<T>[]): Promise<T[]>;
 	list(): Promise<T[]>;
 	findBy(key: string, operator: Operator, value: unknown): Promise<T[]>;
 	update(id: number, mutation: Partial<T>): Promise<T>;
@@ -47,7 +48,7 @@ export class InMemoryRepository<T> implements IRepository<T> {
 	}
 
 	public async findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
-		return this.items.where(key, operator, value).all();
+		return this.items.where(key, operator as any, value).all();
 	}
 
 	public async update(id: number, mutation: Partial<T>): Promise<T> {

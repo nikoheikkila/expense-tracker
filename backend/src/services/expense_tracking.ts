@@ -1,4 +1,5 @@
-import { Expense, expenseSchema, querySchema } from '../../../lib/interfaces';
+import { expenseSchema, Operator, querySchema } from '../../../lib/interfaces';
+import { Expense } from '../domain/entities';
 import { Validator } from '../../../lib/validation';
 import type { IRepository } from './repository';
 

@@ -1,18 +1,19 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { Expense } from '../../../lib/interfaces';
+import { Operator } from '../../../lib/interfaces';
+import { Expense } from '../../src/domain/entities';
 import ExpenseTracker from '../../src/services/expense_tracking';
-import { IRepository, RepositoryFactory } from '../../src/services/repository';
+import { InMemoryRepository, IRepository, RepositoryFactory } from '../../src/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
-	return {
-		name,
-		price,
-		created: new Date(),
-	};
+	const expense = new Expense();
+	expense.name = name;
+	expense.price = price;
+
+	return expense;
 };
 
 describe('Expense Tracking', () => {
-	let repository: IRepository<Expense>;
+	let repository: InMemoryRepository<Expense>;
 	let tracker: ExpenseTracker;
 
 	beforeEach(() => {
@@ -93,7 +94,11 @@ describe('Expense Tracking', () => {
 				generateExpenseFixture(expectedName),
 			);
 
-			const [foundExpense] = await tracker.searchByQuery('name', '===', expectedName);
+			const [foundExpense] = await tracker.searchByQuery(
+				'name',
+				Operator.EQUAL,
+				expectedName,
+			);
 
 			expect(foundExpense).not.toMatchObject(first);
 			expect(foundExpense).toMatchObject(second);
@@ -111,10 +116,14 @@ describe('Expense Tracking', () => {
 
 			const moreExpensiveThanMinimum = await tracker.searchByQuery(
 				'price',
-				'>=',
+				Operator.GREATER_OR_EQUAL,
 				minimumPrice,
 			);
-			const cheaperThanMaximum = await tracker.searchByQuery('price', '<=', maximumPrice);
+			const cheaperThanMaximum = await tracker.searchByQuery(
+				'price',
+				Operator.LESS_OR_EQUAL,
+				maximumPrice,
+			);
 
 			expect(moreExpensiveThanMinimum).toHaveLength(3);
 			expect(cheaperThanMaximum).toHaveLength(3);
@@ -129,13 +138,13 @@ describe('Expense Tracking', () => {
 		test('throws error when expense is not found by query', async () => {
 			await repository.add(generateExpenseFixture('Groceries', 499));
 
-			expect(tracker.searchByQuery('price', '=', 500)).rejects.toThrow(
+			expect(tracker.searchByQuery('price', Operator.EQUAL, 500)).rejects.toThrow(
 				/Expense not found with given query: price=500/,
 			);
 		});
 
 		test('throws error with missing query key', async () => {
-			expect(tracker.searchByQuery('', '==', 1)).rejects.toThrow(
+			expect(tracker.searchByQuery('', Operator.EQUAL, 1)).rejects.toThrow(
 				/Query key must not be empty/,
 			);
 		});

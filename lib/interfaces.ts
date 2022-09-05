@@ -35,5 +35,3 @@ export const querySchema = z.object({
 		),
 	value: z.unknown(),
 });
-
-export type Expense = z.infer<typeof expenseSchema>;
