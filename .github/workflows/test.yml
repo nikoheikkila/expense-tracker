@@ -43,7 +43,7 @@ jobs:
       - name: Run unit tests
         run: task test:unit
 
-      - name: Run unit tests
+      - name: Run integration tests
         run: task test:integration
 
       - name: Run mutation tests
