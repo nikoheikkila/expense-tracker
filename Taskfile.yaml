@@ -92,10 +92,3 @@ tasks:
       NODE_ENV: development
     cmds:
       - npx esno watch server.ts
-
-  migrate:make:
-    desc: Create a new database migration
-    deps:
-      - install
-    cmds:
-      - npx ts-node ./node_modules/.bin/knex migrate:make --knexfile backend/knexfile.ts -x ts {{.CLI_ARGS}}

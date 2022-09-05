@@ -1,6 +1,5 @@
-import migrationConfiguration from './knexfile';
-import knex from 'knex';
 import APIClient from './src/api/client';
+import { AppDataSource } from './config';
 
 const server = APIClient({
 	logger: {
@@ -9,7 +8,8 @@ const server = APIClient({
 });
 
 try {
-	await knex(migrationConfiguration).migrate.latest();
+	await AppDataSource.initialize();
+	await AppDataSource.synchronize();
 	await server.listen({
 		host: process.env.API_HOST,
 		port: Number(process.env.API_PORT),
