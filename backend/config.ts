@@ -13,4 +13,11 @@ export const AppDataSource = new DataSource({
 	entities: [Expense],
 	synchronize: true,
 	logging: false,
+	cache: {
+		type: 'redis',
+		ignoreErrors: true,
+		options: {
+			url: env('REDIS_URL', 'redis://localhost:6379'),
+		},
+	},
 });

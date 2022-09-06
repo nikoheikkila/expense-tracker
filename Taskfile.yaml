@@ -11,6 +11,7 @@ env:
   DB_PORT: 54320
   DB_USER: expense_tracker
   DB_VERSION: 14
+  REDIS_URL: redis://localhost:63790
 
 tasks:
   install:

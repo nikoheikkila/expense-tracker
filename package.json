@@ -18,6 +18,7 @@
 		"fastify": "^4.5.3",
 		"fastify-plugin": "^4.2.1",
 		"pg": "^8.8.0",
+		"redis": "^4.3.1",
 		"reflect-metadata": "^0.1.13",
 		"ts-node": "^10.9.1",
 		"typeorm": "^0.3.9",
