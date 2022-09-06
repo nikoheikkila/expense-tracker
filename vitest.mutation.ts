@@ -12,5 +12,8 @@ export default defineConfig({
 		onConsoleLog(log, type) {
 			return false;
 		},
+		env: {
+			NODE_ENV: 'test',
+		},
 	},
 });

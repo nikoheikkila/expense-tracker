@@ -3,6 +3,9 @@ import { Expense } from './src/domain/entities';
 
 const env = (key: string, fallback: string): string => process.env[key] ?? fallback;
 
+const environment = env('NODE_ENV', 'development');
+const isProduction = environment === 'production';
+
 export const AppDataSource = new DataSource({
 	type: 'postgres',
 	host: env('DB_HOST', 'localhost'),
@@ -11,11 +14,11 @@ export const AppDataSource = new DataSource({
 	password: env('DB_PASSWORD', 'postgres'),
 	database: env('DB_NAME', 'postgres'),
 	entities: [Expense],
-	synchronize: true,
+	synchronize: !isProduction,
 	logging: false,
 	cache: {
 		type: 'redis',
-		ignoreErrors: true,
+		ignoreErrors: !isProduction,
 		options: {
 			url: env('REDIS_URL', 'redis://localhost:6379'),
 		},

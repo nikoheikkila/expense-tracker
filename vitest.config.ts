@@ -16,5 +16,8 @@ export default defineConfig({
 		cache: {
 			dir: '/tmp/.vitest',
 		},
+		env: {
+			NODE_ENV: 'test',
+		},
 	},
 });
