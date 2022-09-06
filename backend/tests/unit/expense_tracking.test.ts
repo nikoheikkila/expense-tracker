@@ -130,8 +130,8 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when expense is not found by ID', async () => {
-			expect(tracker.searchById([999])).rejects.toThrow(
-				/Expenses with IDs \(999\) do not exist/,
+			expect(tracker.searchById([999, 1000])).rejects.toThrow(
+				/Expenses with IDs \(999, 1000\) do not exist/,
 			);
 		});
 
@@ -219,6 +219,12 @@ describe('Expense Tracking', () => {
 			const expenses = await tracker.getExpenses();
 
 			expect(expenses).toHaveLength(0);
+		});
+
+		test('throws error when deleting a missing expense', async () => {
+			expect(tracker.deleteExpenses()).rejects.toThrow(
+				'List of expense IDs to delete cannot be empty',
+			);
 		});
 	});
 

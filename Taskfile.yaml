@@ -68,9 +68,7 @@ tasks:
   test:mutation:
     deps:
       - install
-      - docker
     cmds:
-      - defer: docker-compose down
       - npx stryker run
 
   start:
