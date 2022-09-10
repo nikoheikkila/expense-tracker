@@ -1,6 +1,6 @@
 import collect, { Collection } from 'collect.js';
-import { Expense } from '../domain/entities';
-import { AppDataSource } from '../../config';
+import Expense from '../domain/entities/Expense';
+import AppDataSource from '../../config';
 import { EntityTarget, Repository, SelectQueryBuilder } from 'typeorm';
 import { Operator } from '../../../lib/interfaces';
 
@@ -68,7 +68,7 @@ export class InMemoryRepository<T> implements IRepository<T> {
 // Stryker disable all
 export class ExpenseRepository implements IRepository<Expense> {
 	private readonly repository: Repository<Expense>;
-	private readonly tableName: string = 'expense';
+	private readonly tableName: string = 'expenses';
 
 	constructor(repository: Repository<Expense>) {
 		this.repository = repository;

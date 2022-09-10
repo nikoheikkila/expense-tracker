@@ -23,19 +23,25 @@ tasks:
     cmds:
       - yarn --frozen-lockfile --prefer-offline
 
+  tsc:
+    sources:
+      - backend/**/*.ts
+      - lib/**/*.ts
+      - tsconfig.json
+    generates:
+      - dist
+    cmds:
+      - npx tsc
+
   docker:
     cmds:
       - docker-compose up -d
 
   format:
-    deps:
-      - install
     cmds:
       - npx prettier --write .
 
   lint:
-    deps:
-      - install
     cmds:
       - npx prettier --check .
 
@@ -46,8 +52,6 @@ tasks:
       - task: test:mutation
 
   test:unit:
-    deps:
-      - install
     sources:
       - backend/src/**/*.ts
       - backend/tests/**/*.ts
@@ -57,7 +61,6 @@ tasks:
 
   test:integration:
     deps:
-      - install
       - docker
     sources:
       - backend/src/**/*.ts
@@ -68,15 +71,12 @@ tasks:
       - npx vitest --dir backend/tests/integration {{.CLI_ARGS}}
 
   test:mutation:
-    deps:
-      - install
     cmds:
       - npx stryker run
 
   start:
     desc: Start the backend server for production
     deps:
-      - install
       - docker
     dir: backend
     env:
@@ -87,10 +87,24 @@ tasks:
   dev:
     desc: Start the backend server for development
     deps:
-      - install
       - docker
     dir: backend
     env:
       NODE_ENV: development
     cmds:
       - npx esno watch server.ts
+
+  migration:create:
+    desc: Create a new database migration
+    dir: backend
+    cmds:
+      - npx typeorm migration:create ./migrations/{{.CLI_ARGS}}
+
+  migration:run:
+    desc: Run all pending migrations
+    deps:
+      - tsc
+      - docker
+    dir: dist/backend
+    cmds:
+      - npx typeorm migration:run -d config.js

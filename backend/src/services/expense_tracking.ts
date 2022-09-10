@@ -1,5 +1,5 @@
 import { Operator, querySchema } from '../../../lib/interfaces';
-import { Expense } from '../domain/entities';
+import Expense from '../domain/entities/Expense';
 import { Validator } from '../../../lib/validation';
 import type { IRepository } from './repository';
 

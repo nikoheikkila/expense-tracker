@@ -1,8 +1,7 @@
 import { diContainer, fastifyAwilixPlugin } from '@fastify/awilix';
-import { asFunction, asValue, Lifetime } from 'awilix';
+import { asFunction, Lifetime } from 'awilix';
 import { FastifyInstance } from 'fastify';
-import config from '../../config';
-import { Expense } from '../domain/entities';
+import Expense from '../domain/entities/Expense';
 import ExpenseTracker from '../services/expense_tracking';
 import { IRepository, RepositoryFactory } from '../services/repository';
 

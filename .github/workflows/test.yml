@@ -43,6 +43,9 @@ jobs:
       - name: Run unit tests
         run: task test:unit
 
+      - name: Test database migrations
+        run: task migration:run
+
       - name: Run integration tests
         run: task test:integration
 

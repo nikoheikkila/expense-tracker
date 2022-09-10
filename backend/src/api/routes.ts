@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { FastifyReplyType } from 'fastify/types/type-provider';
-import { Expense } from '../domain/entities';
+import Expense from '../domain/entities/Expense';
 import { ValidationError } from '../../../lib/validation';
 import { InvalidRequestError, MissingExpenseError } from '../services/expense_tracking';
 

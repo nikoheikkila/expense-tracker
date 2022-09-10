@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { z } from 'zod';
-import { Validator } from '../../../lib/validation';
+import { Validator } from '../../../../lib/validation.js';
 
 const nanoIdPattern = new RegExp('[A-Za-z0-9_-]{21}');
 
@@ -26,8 +26,8 @@ class BaseEntity {
 	updatedAt: Date;
 }
 
-@Entity()
-export class Expense extends BaseEntity {
+@Entity({ name: 'expenses' })
+class Expense extends BaseEntity {
 	@Column({ type: 'varchar', length: 255 })
 	name: string;
 	@Column({ type: 'integer' })
@@ -40,3 +40,5 @@ export class Expense extends BaseEntity {
 		);
 	}
 }
+
+export default Expense;

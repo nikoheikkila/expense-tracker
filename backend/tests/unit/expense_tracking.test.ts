@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Operator } from '../../../lib/interfaces';
-import { Expense } from '../../src/domain/entities';
+import Expense from '../../src/domain/entities/Expense';
 import ExpenseTracker from '../../src/services/expense_tracking';
 import { InMemoryRepository, RepositoryFactory } from '../../src/services/repository';
 
