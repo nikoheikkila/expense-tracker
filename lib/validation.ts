@@ -19,12 +19,6 @@ export class Validator {
 		return this.parse(this.schema, object);
 	}
 
-	public parseArray<T extends AnyRecord>(array: T[]): T[] {
-		const schema = this.schema.array().min(1, { message: 'Input data must not be empty' });
-
-		return this.parse(schema, array);
-	}
-
 	private parse<T extends AnyRecord>(schema: ZodTypeAny, object: T): T {
 		try {
 			return schema.parse(object);

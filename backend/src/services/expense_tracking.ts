@@ -1,4 +1,4 @@
-import { expenseSchema, Operator, querySchema } from '../../../lib/interfaces';
+import { Operator, querySchema } from '../../../lib/interfaces';
 import { Expense } from '../domain/entities';
 import { Validator } from '../../../lib/validation';
 import type { IRepository } from './repository';
@@ -8,12 +8,10 @@ export class InvalidRequestError extends Error {}
 
 class ExpenseTracker {
 	private repository: IRepository<Expense>;
-	private expenseValidator: Validator;
 	private queryValidator: Validator;
 
 	constructor(repository: IRepository<Expense>) {
 		this.repository = repository;
-		this.expenseValidator = Validator.withSchema(expenseSchema);
 		this.queryValidator = Validator.withSchema(querySchema);
 	}
 
@@ -22,7 +20,11 @@ class ExpenseTracker {
 	}
 
 	public async addExpenses(...expenses: Expense[]): Promise<Expense[]> {
-		return this.repository.add(...this.expenseValidator.parseArray(expenses));
+		if (expenses.length === 0) {
+			throw new InvalidRequestError('List of expenses to add cannot be empty');
+		}
+
+		return this.repository.add(...expenses);
 	}
 
 	public async searchById(ids: number[]): Promise<Expense[]> {

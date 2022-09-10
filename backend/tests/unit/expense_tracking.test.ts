@@ -2,14 +2,10 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vi
 import { Operator } from '../../../lib/interfaces';
 import { Expense } from '../../src/domain/entities';
 import ExpenseTracker from '../../src/services/expense_tracking';
-import { InMemoryRepository, IRepository, RepositoryFactory } from '../../src/services/repository';
+import { InMemoryRepository, RepositoryFactory } from '../../src/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
-	const expense = new Expense();
-	expense.name = name;
-	expense.price = price;
-
-	return expense;
+	return Expense.make({ name, price });
 };
 
 describe('Expense Tracking', () => {
@@ -49,27 +45,9 @@ describe('Expense Tracking', () => {
 			expect(filedExpenses).toMatchObject(expenses);
 		});
 
-		test('throws error when adding expense with zero ID', async () => {
-			expect(tracker.addExpenses({ id: 0 } as Expense)).rejects.toThrow(
-				/ID must be greater or equal to 1/,
-			);
-		});
-
 		test('throws error when adding empty expense', async () => {
-			expect(tracker.addExpenses()).rejects.toThrow(/Input data must not be empty/);
-		});
-
-		test('throws error when adding expense without name', async () => {
-			const withoutName = generateExpenseFixture('', 1);
-			expect(tracker.addExpenses(withoutName)).rejects.toThrow(
-				/Expense name must not be empty/,
-			);
-		});
-
-		test('throws error when adding expense with negative price', async () => {
-			const negativePrice = generateExpenseFixture('Item', -1);
-			expect(tracker.addExpenses(negativePrice)).rejects.toThrow(
-				/Expense price must be greater than zero/,
+			expect(tracker.addExpenses()).rejects.toThrow(
+				/List of expenses to add cannot be empty/,
 			);
 		});
 	});
@@ -230,17 +208,13 @@ describe('Expense Tracking', () => {
 
 	describe('Validating expense data', () => {
 		test('throws validation error for empty name', async () => {
-			const invalidExpense = generateExpenseFixture('');
-			const expectedError = /Expense name must not be empty/;
-
-			expect(tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
+			expect(() => generateExpenseFixture('')).toThrow(/Expense name must not be empty/);
 		});
 
 		test('throws validation error for negative price', async () => {
-			const invalidExpense = generateExpenseFixture('Negative', -1);
-			const expectedError = /Expense price must be greater than zero/;
-
-			expect(tracker.addExpenses(invalidExpense)).rejects.toThrow(expectedError);
+			expect(() => generateExpenseFixture('Negative', -1)).toThrowError(
+				/Expense price must be greater than zero/,
+			);
 		});
 	});
 });
