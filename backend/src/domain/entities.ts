@@ -1,5 +1,12 @@
 import 'reflect-metadata';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+	Column,
+	CreateDateColumn,
+	Entity,
+	PrimaryColumn,
+	PrimaryGeneratedColumn,
+	UpdateDateColumn,
+} from 'typeorm';
 import { z } from 'zod';
 import { Validator } from '../../../lib/validation';
 
@@ -11,7 +18,8 @@ const expenseSchema = z.object({
 	}),
 	name: z.string().min(1, 'Expense name must not be empty'),
 	price: z.number().gte(0, 'Expense price must be greater than zero'),
-	created: z.date().optional(),
+	updatedAt: z.date().optional(),
+	createdAt: z.date().optional(),
 });
 
 @Entity()
@@ -22,8 +30,10 @@ export class Expense {
 	name: string;
 	@Column({ type: 'integer' })
 	price: number;
+	@UpdateDateColumn({ type: 'timestamp', default: new Date(Date.now()) })
+	updatedAt: Date;
 	@CreateDateColumn({ type: 'timestamp', default: new Date(Date.now()) })
-	created: Date;
+	createdAt: Date;
 
 	public static make(values: Partial<Expense>): Expense {
 		return Object.assign(
