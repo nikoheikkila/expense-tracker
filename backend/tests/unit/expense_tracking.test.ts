@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Operator } from '../../../lib/interfaces';
 import { Expense } from '../../src/domain/entities';
@@ -5,7 +6,7 @@ import ExpenseTracker from '../../src/services/expense_tracking';
 import { InMemoryRepository, RepositoryFactory } from '../../src/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
-	return Expense.make({ name, price });
+	return Expense.make({ id: nanoid(), name, price });
 };
 
 describe('Expense Tracking', () => {
@@ -59,7 +60,7 @@ describe('Expense Tracking', () => {
 				generateExpenseFixture('Couch'),
 			);
 
-			const [firstFound] = await tracker.searchById([1]);
+			const [firstFound] = await tracker.searchById([first.id]);
 
 			expect(firstFound).toMatchObject(first);
 			expect(firstFound).not.toMatchObject(second);
@@ -108,9 +109,11 @@ describe('Expense Tracking', () => {
 		});
 
 		test('throws error when expense is not found by ID', async () => {
-			expect(tracker.searchById([999, 1000])).rejects.toThrow(
-				/Expenses with IDs \(999, 1000\) do not exist/,
-			);
+			const firstId = nanoid();
+			const secondId = nanoid();
+			const expectedError = `Expenses with IDs (${firstId}, ${secondId}) do not exist`;
+
+			expect(tracker.searchById([firstId, secondId])).rejects.toThrowError(expectedError);
 		});
 
 		test('throws error when expense is not found by query', async () => {
@@ -145,10 +148,10 @@ describe('Expense Tracking', () => {
 
 	describe('Updating expenses', () => {
 		test('updates an existing expense with new details', async () => {
-			await repository.add(generateExpenseFixture('Old Name', 100));
+			const [first] = await repository.add(generateExpenseFixture('Old Name', 100));
 			const newDetails = generateExpenseFixture('New Name', 200);
 
-			const expense = await tracker.updateExpense(1, newDetails);
+			const expense = await tracker.updateExpense(first.id, newDetails);
 
 			expect(expense).toMatchObject(newDetails);
 		});
@@ -156,25 +159,25 @@ describe('Expense Tracking', () => {
 		test('throws error when updating a missing expense', async () => {
 			const newDetails = generateExpenseFixture('New Name', 200);
 
-			expect(tracker.updateExpense(1, newDetails)).rejects.toThrow(
-				'Expenses with IDs (1) do not exist',
+			expect(tracker.updateExpense(nanoid(), newDetails)).rejects.toThrow(
+				/Expenses with IDs (.+) do not exist/,
 			);
 		});
 
 		test('throws error when updating expense with empty data', async () => {
-			await repository.add(generateExpenseFixture('Old Name', 100));
+			const [expense] = await repository.add(generateExpenseFixture('Old Name', 100));
 
-			expect(tracker.updateExpense(1, {} as Expense)).rejects.toThrow(
+			expect(tracker.updateExpense(expense.id, {} as Expense)).rejects.toThrow(
 				/Specify one or more allowed key-value pairs to update the expense/,
 			);
 		});
 
 		test('throws error when updating expense with disallowed keys', async () => {
-			await repository.add(generateExpenseFixture('Old Name', 100));
+			const [expense] = await repository.add(generateExpenseFixture('Old Name', 100));
 
 			const bogusData = { key1: 'bogus', key2: 'bogus' } as any as Expense;
 
-			expect(tracker.updateExpense(1, bogusData)).rejects.toThrow(
+			expect(tracker.updateExpense(expense.id, bogusData)).rejects.toThrow(
 				'Unrecognized key-value pairs (key1, key2) used to update the expense',
 			);
 		});
@@ -182,18 +185,24 @@ describe('Expense Tracking', () => {
 
 	describe('Deleting expenses', () => {
 		test('deletes an existing expense', async () => {
-			await repository.add(generateExpenseFixture(), generateExpenseFixture());
+			const [expense1, expense2] = await repository.add(
+				generateExpenseFixture(),
+				generateExpenseFixture(),
+			);
 
-			await tracker.deleteExpenses(1);
+			await tracker.deleteExpenses(expense1.id);
 			const expenses = await tracker.getExpenses();
 
 			expect(expenses).toHaveLength(1);
 		});
 
 		test('deletes multiple existing expenses', async () => {
-			await repository.add(generateExpenseFixture(), generateExpenseFixture());
+			const [expense1, expense2] = await repository.add(
+				generateExpenseFixture(),
+				generateExpenseFixture(),
+			);
 
-			await tracker.deleteExpenses(1, 2);
+			await tracker.deleteExpenses(expense1.id, expense2.id);
 			const expenses = await tracker.getExpenses();
 
 			expect(expenses).toHaveLength(0);
@@ -207,8 +216,14 @@ describe('Expense Tracking', () => {
 	});
 
 	describe('Validating expense data', () => {
+		test('throws validation error for invalid ID', async () => {
+			expect(() => Expense.make({ id: 'null' })).toThrowError(
+				/Expense ID must match regular expression/,
+			);
+		});
+
 		test('throws validation error for empty name', async () => {
-			expect(() => generateExpenseFixture('')).toThrow(/Expense name must not be empty/);
+			expect(() => generateExpenseFixture('')).toThrowError(/Expense name must not be empty/);
 		});
 
 		test('throws validation error for negative price', async () => {

@@ -1,10 +1,8 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { FastifyReplyType } from 'fastify/types/type-provider';
-import { Expense } from '../../../lib/interfaces';
+import { Expense } from '../domain/entities';
 import { ValidationError } from '../../../lib/validation';
 import { InvalidRequestError, MissingExpenseError } from '../services/expense_tracking';
-
-type WithoutId<T> = Omit<T, 'id'>;
 
 interface APIError {
 	error: string;
@@ -16,7 +14,7 @@ interface HealthCheck {
 }
 
 interface AddExpenses {
-	Body: Array<WithoutId<Expense>>;
+	Body: Expense[];
 	Reply: Array<Expense> | APIError;
 }
 
@@ -36,19 +34,19 @@ interface SearchExpenses {
 
 interface UpdateExpenses {
 	Body: {
-		id: number;
-		update: WithoutId<Expense>;
+		id: Expense['id'];
+		update: Expense;
 	};
 	Reply: {
-		id: number;
-		old: WithoutId<Expense>;
-		new: WithoutId<Expense>;
+		id: Expense['id'];
+		old: Expense;
+		new: Expense;
 	};
 }
 
 interface DeleteExpenses {
 	Body: {
-		ids: number[];
+		ids: Array<Expense['id']>;
 	};
 	Reply: undefined;
 }
@@ -86,7 +84,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 			const { key, operator, value } = request.body;
 
 			try {
-				const expenses = await tracker.searchByQuery(key, operator, value);
+				const expenses = await tracker.searchByQuery(key, operator as any, value);
 
 				return sendResponse<SearchExpenses['Reply']>(response, 200, expenses);
 			} catch (error: unknown) {

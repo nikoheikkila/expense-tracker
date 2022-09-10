@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { asValue } from 'awilix';
 import { FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -36,6 +37,7 @@ describe('API Tests', () => {
 		test('return 201 for single expense', async () => {
 			const payload = [
 				{
+					id: nanoid(),
 					name: 'Groceries',
 					price: 100,
 				},
@@ -49,7 +51,6 @@ describe('API Tests', () => {
 			expect(response.statusCode).toBe(201);
 			expect(response.json()).toMatchObject([
 				{
-					id: 1,
 					name: 'Groceries',
 					price: 100,
 				},
@@ -59,10 +60,12 @@ describe('API Tests', () => {
 		test('returns 201 for multiple expenses', async () => {
 			const payload = [
 				{
+					id: nanoid(),
 					name: 'Groceries',
 					price: 100,
 				},
 				{
+					id: nanoid(),
 					name: 'Gas',
 					price: 50,
 				},
@@ -76,12 +79,10 @@ describe('API Tests', () => {
 			expect(response.statusCode).toBe(201);
 			expect(response.json()).toMatchObject([
 				{
-					id: 1,
 					name: 'Groceries',
 					price: 100,
 				},
 				{
-					id: 2,
 					name: 'Gas',
 					price: 50,
 				},
@@ -112,7 +113,7 @@ describe('API Tests', () => {
 			const response = await app.inject({
 				method: 'PUT',
 				url: '/api/expenses/add',
-				payload: [{ name: 'Groceries', price: 100 }],
+				payload: [{ id: nanoid(), name: 'Groceries', price: 100 }],
 			});
 
 			expect(response.statusCode).toBe(500);
@@ -139,10 +140,12 @@ describe('API Tests', () => {
 		test('returns 200 with expenses', async () => {
 			const payload = [
 				{
+					id: nanoid(),
 					name: 'Groceries',
 					price: 100,
 				},
 				{
+					id: nanoid(),
 					name: 'Gas',
 					price: 50,
 				},
@@ -156,12 +159,10 @@ describe('API Tests', () => {
 			expect(response.statusCode).toBe(200);
 			expect(response.json()).toMatchObject([
 				{
-					id: 1,
 					name: 'Groceries',
 					price: 100,
 				},
 				{
-					id: 2,
 					name: 'Gas',
 					price: 50,
 				},
@@ -172,6 +173,7 @@ describe('API Tests', () => {
 	describe('POST /api/expenses/search', () => {
 		test('returns 200 for expense found with ID', async () => {
 			const expense = {
+				id: nanoid(),
 				name: 'Groceries',
 				price: 100,
 			};
@@ -184,13 +186,12 @@ describe('API Tests', () => {
 				payload: {
 					key: 'id',
 					operator: '=',
-					value: 1,
+					value: expense.id,
 				},
 			});
 
 			expect(response.json()).toMatchObject([
 				{
-					id: 1,
 					name: 'Groceries',
 					price: 100,
 				},
@@ -200,6 +201,7 @@ describe('API Tests', () => {
 
 		test('returns 200 for expense found with name', async () => {
 			const expense = {
+				id: nanoid(),
 				name: 'Groceries',
 				price: 100,
 			};
@@ -218,7 +220,6 @@ describe('API Tests', () => {
 
 			expect(response.json()).toMatchObject([
 				{
-					id: 1,
 					name: 'Groceries',
 					price: 100,
 				},
@@ -228,6 +229,7 @@ describe('API Tests', () => {
 
 		test('returns 404 for expense not found with name', async () => {
 			const expense = {
+				id: nanoid(),
 				name: 'Groceries',
 				price: 100,
 			};
@@ -263,7 +265,10 @@ describe('API Tests', () => {
 
 	describe('POST /api/expenses/update', () => {
 		test('returns 200 for updated expense', async () => {
+			const id = nanoid();
+
 			const expense = {
+				id,
 				name: 'Groceries',
 				price: 100,
 			};
@@ -274,7 +279,7 @@ describe('API Tests', () => {
 				method: 'POST',
 				url: '/api/expenses/update',
 				payload: {
-					id: 1,
+					id,
 					update: {
 						name: 'Gas',
 						price: 50,
@@ -283,14 +288,14 @@ describe('API Tests', () => {
 			});
 
 			expect(response.json()).toMatchObject({
-				id: 1,
+				id,
 				old: {
-					id: 1,
+					id,
 					name: 'Groceries',
 					price: 100,
 				},
 				new: {
-					id: 1,
+					id,
 					name: 'Gas',
 					price: 50,
 				},
@@ -303,7 +308,7 @@ describe('API Tests', () => {
 				method: 'POST',
 				url: '/api/expenses/update',
 				payload: {
-					id: 1,
+					id: nanoid(),
 					update: {
 						name: 'Gas',
 					},
@@ -312,12 +317,15 @@ describe('API Tests', () => {
 
 			expect(response.statusCode).toBe(404);
 			expect(response.json()).toMatchObject({
-				error: 'Not Found: Expenses with IDs (1) do not exist',
+				error: /Not Found: Expenses with IDs (.+) do not exist/,
 			});
 		});
 
 		test('returns 400 when updating an expense with disallowed keys', async () => {
+			const id = nanoid();
+
 			const expense = {
+				id,
 				name: 'Gardening',
 				price: 100,
 			};
@@ -328,7 +336,7 @@ describe('API Tests', () => {
 				method: 'POST',
 				url: '/api/expenses/update',
 				payload: {
-					id: 1,
+					id,
 					update: {
 						vatPrice: 24,
 					},
@@ -346,10 +354,12 @@ describe('API Tests', () => {
 		test('returns 204 without content for deleted expenses', async () => {
 			const expenses = [
 				{
+					id: nanoid(),
 					name: 'Groceries',
 					price: 100,
 				},
 				{
+					id: nanoid(),
 					name: 'Gas',
 					price: 50,
 				},
@@ -361,7 +371,7 @@ describe('API Tests', () => {
 				method: 'DELETE',
 				url: '/api/expenses/delete',
 				payload: {
-					ids: [1, 2],
+					ids: [expenses[0].id, expenses[1].id],
 				},
 			});
 
@@ -389,7 +399,7 @@ describe('API Tests', () => {
 				method: 'DELETE',
 				url: '/api/expenses/delete',
 				payload: {
-					ids: [1, 2, 3],
+					ids: ['1', '2', '3'],
 				},
 			});
 

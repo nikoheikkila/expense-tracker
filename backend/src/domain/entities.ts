@@ -1,10 +1,14 @@
 import 'reflect-metadata';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { z } from 'zod';
 import { Validator } from '../../../lib/validation';
 
+const nanoIdPattern = new RegExp('[A-Za-z0-9_-]{21}');
+
 const expenseSchema = z.object({
-	id: z.number().gte(1, 'ID must be greater or equal to 1').optional(),
+	id: z.string().regex(nanoIdPattern, {
+		message: `Expense ID must match regular expression: ${nanoIdPattern}`,
+	}),
 	name: z.string().min(1, 'Expense name must not be empty'),
 	price: z.number().gte(0, 'Expense price must be greater than zero'),
 	created: z.date().optional(),
@@ -12,8 +16,8 @@ const expenseSchema = z.object({
 
 @Entity()
 export class Expense {
-	@PrimaryGeneratedColumn({ type: 'integer' })
-	id: number;
+	@PrimaryColumn({ type: 'varchar', length: 21 })
+	id: string;
 	@Column({ type: 'varchar', length: 255 })
 	name: string;
 	@Column({ type: 'integer' })

@@ -27,7 +27,7 @@ class ExpenseTracker {
 		return this.repository.add(...expenses);
 	}
 
-	public async searchById(ids: number[]): Promise<Expense[]> {
+	public async searchById(ids: string[]): Promise<Expense[]> {
 		const result = await this.repository.get(...ids);
 
 		if (result.length === 0) {
@@ -54,14 +54,14 @@ class ExpenseTracker {
 		return result;
 	}
 
-	public async updateExpense(id: number, data: Expense): Promise<Expense> {
+	public async updateExpense(id: string, data: Expense): Promise<Expense> {
 		const [item] = await this.searchById([id]);
 		validateIncompatibleForeignKeys(item, data);
 
 		return this.repository.update(id, data);
 	}
 
-	public async deleteExpenses(...ids: number[]): Promise<void> {
+	public async deleteExpenses(...ids: string[]): Promise<void> {
 		if (ids.length === 0) {
 			throw new InvalidRequestError('List of expense IDs to delete cannot be empty');
 		}
