@@ -5,7 +5,9 @@ pre-push:
       tags: security
       run: yarn audit
     tests:
-      run: task lint test
+      run: task lint test:unit
+      env:
+        CI: true
 
 pre-commit:
   parallel: true
