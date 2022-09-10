@@ -1,12 +1,5 @@
 import 'reflect-metadata';
-import {
-	Column,
-	CreateDateColumn,
-	Entity,
-	PrimaryColumn,
-	PrimaryGeneratedColumn,
-	UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { z } from 'zod';
 import { Validator } from '../../../lib/validation';
 
@@ -23,18 +16,23 @@ const expenseSchema = z.object({
 });
 
 @Entity()
-export class Expense {
+class BaseEntity {
 	@PrimaryColumn({ type: 'varchar', length: 21 })
 	id: string;
+	@CreateDateColumn()
+	createdAt: Date;
+
+	@UpdateDateColumn()
+	updatedAt: Date;
+}
+
+@Entity()
+export class Expense extends BaseEntity {
 	@Column({ type: 'varchar', length: 255 })
 	name: string;
 	@Column({ type: 'integer' })
 	price: number;
 	@UpdateDateColumn({ type: 'timestamp', default: new Date(Date.now()) })
-	updatedAt: Date;
-	@CreateDateColumn({ type: 'timestamp', default: new Date(Date.now()) })
-	createdAt: Date;
-
 	public static make(values: Partial<Expense>): Expense {
 		return Object.assign(
 			new Expense(),
