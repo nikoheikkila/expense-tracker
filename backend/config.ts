@@ -15,6 +15,8 @@ const AppDataSource = new DataSource({
 	database: env('DB_NAME', 'postgres'),
 	entities,
 	synchronize: !isProduction,
+	migrationsRun: isProduction,
+	migrations: ['src/migrations/*.ts'],
 	logging: false,
 	cache: {
 		type: 'redis',
