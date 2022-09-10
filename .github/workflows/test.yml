@@ -34,6 +34,9 @@ jobs:
             ${{ runner.os }}-task-
             ${{ runner.os }}-
 
+      - name: Launch Docker services
+        run: task docker
+
       - name: Install dependencies
         run: task install
 
