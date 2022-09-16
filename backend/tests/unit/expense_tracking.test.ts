@@ -3,7 +3,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vi
 import { Operator } from '../../../lib/interfaces';
 import Expense from '../../src/domain/entities/Expense';
 import ExpenseTracker from '../../src/services/expense_tracking';
-import { InMemoryRepository, RepositoryFactory } from '../../src/services/repository';
+import { InMemoryRepository, ExpenseRepositoryFactory } from '../../src/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
 	return Expense.make({ id: nanoid(), name, price });
@@ -18,7 +18,7 @@ describe('Expense Tracking', () => {
 	});
 
 	beforeAll(() => {
-		repository = RepositoryFactory.withInMemoryDatabase();
+		repository = ExpenseRepositoryFactory.withInMemoryDatabase();
 		tracker = new ExpenseTracker(repository);
 	});
 

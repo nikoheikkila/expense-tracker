@@ -1,10 +1,11 @@
 import collect, { Collection } from 'collect.js';
-import Expense from '../domain/entities/Expense';
-import AppDataSource from '../../config';
-import { EntityTarget, Repository, SelectQueryBuilder } from 'typeorm';
+import { EntityTarget, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import { Operator } from '../../../lib/interfaces';
+import AppDataSource from '../../config';
+import Expense from '../domain/entities/Expense';
 
 export interface IRepository<T> {
+	transacting<R>(operation: () => R): Promise<R>;
 	get(...ids: string[]): Promise<T[]>;
 	add(...items: Partial<T>[]): Promise<T[]>;
 	list(): Promise<T[]>;
@@ -19,6 +20,10 @@ export class InMemoryRepository<T> implements IRepository<T> {
 
 	constructor(...items: T[]) {
 		this.items = collect(items);
+	}
+
+	public async transacting<R>(operation: () => R): Promise<R> {
+		return operation();
 	}
 
 	public async get(...ids: string[]): Promise<T[]> {
@@ -74,6 +79,25 @@ export class ExpenseRepository implements IRepository<Expense> {
 		this.repository = repository;
 	}
 
+	public async transacting<R>(operation: () => R): Promise<R> {
+		const runner = AppDataSource.createQueryRunner();
+		await runner.connect();
+		await runner.startTransaction();
+
+		try {
+			const result = operation();
+			await runner.commitTransaction();
+
+			return result;
+		} catch (error: unknown) {
+			await runner.rollbackTransaction();
+
+			throw error;
+		} finally {
+			await runner.release();
+		}
+	}
+
 	private get query(): SelectQueryBuilder<Expense> {
 		return this.repository.createQueryBuilder(this.tableName);
 	}
@@ -82,14 +106,14 @@ export class ExpenseRepository implements IRepository<Expense> {
 		return this.query.whereInIds(ids).getMany();
 	}
 	public async add(...items: Expense[]): Promise<Expense[]> {
-		const result = await this.query
+		const { raw } = await this.query
 			.insert()
 			.into(this.tableName)
 			.values(items)
 			.returning(['id', 'name', 'price'])
 			.execute();
 
-		return result.raw;
+		return raw;
 	}
 	public async list(): Promise<Expense[]> {
 		return this.query.getMany();
@@ -105,8 +129,14 @@ export class ExpenseRepository implements IRepository<Expense> {
 			.returning(['id', 'name', 'price'])
 			.execute();
 
-		return result.raw[0];
+		return this.parseUpdateResult(result);
 	}
+	private parseUpdateResult(result: UpdateResult): Expense {
+		const { raw } = result;
+
+		return Array.isArray(raw) && raw.length > 0 ? raw.pop() : raw;
+	}
+
 	public async delete(...ids: string[]): Promise<void> {
 		await this.query.delete().whereInIds(ids).execute();
 	}
@@ -115,13 +145,12 @@ export class ExpenseRepository implements IRepository<Expense> {
 	}
 }
 
-export class RepositoryFactory {
-	public static withInMemoryDatabase<T>(): InMemoryRepository<T> {
-		return new InMemoryRepository<T>();
+export class ExpenseRepositoryFactory {
+	public static withInMemoryDatabase(): InMemoryRepository<Expense> {
+		return new InMemoryRepository<Expense>();
 	}
 
 	public static withSQLDatabase(entity: EntityTarget<Expense>): ExpenseRepository {
-		const repository = AppDataSource.getRepository<Expense>(entity);
-		return new ExpenseRepository(repository);
+		return new ExpenseRepository(AppDataSource.getRepository<Expense>(entity));
 	}
 }

@@ -16,7 +16,7 @@ class ExpenseTracker {
 	}
 
 	public async getExpenses(): Promise<Expense[]> {
-		return this.repository.list();
+		return this.repository.transacting(() => this.repository.list());
 	}
 
 	public async addExpenses(...expenses: Expense[]): Promise<Expense[]> {
@@ -24,17 +24,21 @@ class ExpenseTracker {
 			throw new InvalidRequestError('List of expenses to add cannot be empty');
 		}
 
-		return this.repository.add(...expenses);
+		return this.repository.transacting(() => {
+			return this.repository.add(...expenses);
+		});
 	}
 
 	public async searchById(ids: string[]): Promise<Expense[]> {
-		const result = await this.repository.get(...ids);
+		return this.repository.transacting(async () => {
+			const result = await this.repository.get(...ids);
 
-		if (result.length === 0) {
-			throw new MissingExpenseError(`Expenses with IDs (${ids.join(', ')}) do not exist`);
-		}
+			if (result.length === 0) {
+				throw new MissingExpenseError(`Expenses with IDs (${ids.join(', ')}) do not exist`);
+			}
 
-		return result;
+			return result;
+		});
 	}
 
 	public async searchByQuery(
@@ -44,21 +48,25 @@ class ExpenseTracker {
 	): Promise<Expense[]> {
 		this.queryValidator.parseObject({ key, operator, value });
 
-		const result = await this.repository.findBy(key, operator, value);
+		return this.repository.transacting(async () => {
+			const result = await this.repository.findBy(key, operator, value);
 
-		if (result.length === 0) {
-			const query = [key, operator, value].join('');
-			throw new MissingExpenseError(`Expense not found with given query: ${query}`);
-		}
+			if (result.length === 0) {
+				const query = [key, operator, value].join('');
+				throw new MissingExpenseError(`Expense not found with given query: ${query}`);
+			}
 
-		return result;
+			return result;
+		});
 	}
 
 	public async updateExpense(id: string, data: Expense): Promise<Expense> {
-		const [item] = await this.searchById([id]);
-		validateIncompatibleForeignKeys(item, data);
+		return this.repository.transacting(async () => {
+			const [item] = await this.searchById([id]);
+			validateIncompatibleForeignKeys(item, data);
 
-		return this.repository.update(id, data);
+			return this.repository.update(id, data);
+		});
 	}
 
 	public async deleteExpenses(...ids: string[]): Promise<void> {
@@ -66,9 +74,10 @@ class ExpenseTracker {
 			throw new InvalidRequestError('List of expense IDs to delete cannot be empty');
 		}
 
-		await this.searchById(ids);
-
-		await this.repository.delete(...ids);
+		return this.repository.transacting(async () => {
+			await this.searchById(ids);
+			await this.repository.delete(...ids);
+		});
 	}
 }
 
