@@ -20,7 +20,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 	};
 
 	diContainer.register({
-		expenseRepository: asFunction(() => ExpenseRepositoryFactory.withSQLDatabase(Expense), {
+		expenseRepository: asFunction(() => ExpenseRepositoryFactory.withSQLDatabase(), {
 			...defaultInjectionOptions,
 		}),
 		expenseTracker: asFunction((container) => new ExpenseTracker(container.expenseRepository), {

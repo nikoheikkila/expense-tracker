@@ -1,7 +1,7 @@
 import collect, { Collection } from 'collect.js';
-import { EntityTarget, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
-import { Operator } from '../../../lib/interfaces';
+import { DataSource, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import AppDataSource from '../../config';
+import { Operator } from '../../../lib/interfaces';
 import Expense from '../domain/entities/Expense';
 
 export interface IRepository<T> {
@@ -72,15 +72,18 @@ export class InMemoryRepository<T> implements IRepository<T> {
 
 // Stryker disable all
 export class ExpenseRepository implements IRepository<Expense> {
+	private readonly dataSource: DataSource;
 	private readonly repository: Repository<Expense>;
 	private readonly tableName: string = 'expenses';
 
-	constructor(repository: Repository<Expense>) {
-		this.repository = repository;
+	constructor(dataSource: DataSource) {
+		this.dataSource = dataSource;
+		this.repository = dataSource.getRepository(Expense);
 	}
 
 	public async transacting<R>(operation: () => R): Promise<R> {
-		const runner = AppDataSource.createQueryRunner();
+		const runner = this.dataSource.createQueryRunner();
+
 		await runner.connect();
 		await runner.startTransaction();
 
@@ -150,7 +153,7 @@ export class ExpenseRepositoryFactory {
 		return new InMemoryRepository<Expense>();
 	}
 
-	public static withSQLDatabase(entity: EntityTarget<Expense>): ExpenseRepository {
-		return new ExpenseRepository(AppDataSource.getRepository<Expense>(entity));
+	public static withSQLDatabase(): ExpenseRepository {
+		return new ExpenseRepository(AppDataSource);
 	}
 }
