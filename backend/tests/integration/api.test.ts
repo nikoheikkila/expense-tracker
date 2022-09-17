@@ -1,11 +1,11 @@
 import { nanoid } from 'nanoid';
 import { asValue } from 'awilix';
 import { FastifyInstance } from 'fastify';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import Expense from '../../src/domain/entities/Expense';
-import AppDataSource from '../../config';
-import APIClient from '../../src/api/client';
-import { IRepository } from '../../src/services/repository';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import Expense from '@backend/domain/entities/Expense';
+import AppDataSource from '@backend/config';
+import APIClient from '@backend/api/client';
+import { IRepository } from '@backend/services/repository';
 
 describe('API Tests', () => {
 	let app: FastifyInstance;

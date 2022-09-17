@@ -1,9 +1,9 @@
 import { nanoid } from 'nanoid';
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { Operator } from '../../../lib/interfaces';
-import Expense from '../../src/domain/entities/Expense';
-import ExpenseTracker from '../../src/services/expense_tracking';
-import { InMemoryRepository, ExpenseRepositoryFactory } from '../../src/services/repository';
+import { Operator } from '@lib/interfaces';
+import Expense from '@backend/domain/entities/Expense';
+import ExpenseTracker from '@backend/services/expense_tracking';
+import { InMemoryRepository, ExpenseRepositoryFactory } from '@backend/services/repository';
 
 const generateExpenseFixture = (name: string = 'Item', price: number = 100): Expense => {
 	return Expense.make({ id: nanoid(), name, price });

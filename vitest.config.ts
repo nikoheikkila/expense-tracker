@@ -1,15 +1,12 @@
 import { defineConfig } from 'vitest/config';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
+	plugins: [tsconfigPaths()],
 	test: {
-		include: ['**/*.{test,spec}.{ts,mts,cts,tsx}'],
+		exclude: ['**/node_modules/**', '**/dist/**'],
 		environment: 'node',
 		reporters: ['verbose'],
-		coverage: {
-			enabled: true,
-			src: ['backend/src/**/*.ts'],
-			reporter: ['html'],
-		},
 		sequence: {
 			shuffle: true,
 		},

@@ -1,9 +1,9 @@
 import { diContainer, fastifyAwilixPlugin } from '@fastify/awilix';
 import { asFunction, Lifetime } from 'awilix';
 import { FastifyInstance } from 'fastify';
-import Expense from '../domain/entities/Expense';
-import ExpenseTracker from '../services/expense_tracking';
-import { IRepository, ExpenseRepositoryFactory } from '../services/repository';
+import Expense from '@backend/domain/entities/Expense';
+import ExpenseTracker from '@backend/services/expense_tracking';
+import { IRepository, ExpenseRepositoryFactory } from '@backend/services/repository';
 
 declare module '@fastify/awilix' {
 	interface Cradle {

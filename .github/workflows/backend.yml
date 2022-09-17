@@ -1,0 +1,105 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  commit-stage:
+    name: Backend Commit Stage Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: yarn
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: task install
+
+      - name: Lint codebase
+        run: task lint
+
+      - name: Run unit tests
+        run: task backend:test:unit
+
+  acceptance-stage:
+    name: Backend Acceptance Stage Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: yarn
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Launch Docker services
+        run: task docker
+
+      - name: Install dependencies
+        run: task install
+
+      - name: Test database migrations
+        run: task backend:migration:run
+
+      - name: Run integration tests
+        run: task backend:test:integration
+
+      - name: Run mutation tests
+        run: task backend:test:mutation
+
+      - name: Upload results of failed tests
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: stryker-report
+          path: reports/
+
+  deploy:
+    name: Backend Deployment
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    needs:
+      - commit-stage
+      - acceptance-stage
+
+    steps:
+      - name: Deploy
+        run: echo 'Deploying...'
+
+  smoke-test:
+    name: Backend Smoke Tests
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    needs: deploy
+
+    steps:
+      - name: Run smoke tests
+        run: echo 'Running smoke tests...'

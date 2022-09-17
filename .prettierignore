@@ -1,6 +1,7 @@
 dist/
 coverage/
 reports/
+.stryker-tmp/
 *.lock
 .prettierignore
 .editorconfig

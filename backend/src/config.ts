@@ -1,10 +1,20 @@
 import { DataSource } from 'typeorm';
-import entities from './src/domain/entities/index.js';
+import path from 'node:path';
 
 const env = (key: string, fallback: string): string => process.env[key] ?? fallback;
 
 const environment = env('NODE_ENV', 'development');
 const isProduction = environment === 'production';
+const isTesting = environment === 'test';
+
+const getEntities = async () => {
+	if (isTesting) {
+		const entities = await import('./domain/entities/Expense');
+		return Object.values(entities);
+	}
+
+	return [path.join('domain', 'entities', '*.ts')];
+};
 
 const AppDataSource = new DataSource({
 	type: 'postgres',
@@ -13,10 +23,10 @@ const AppDataSource = new DataSource({
 	username: env('DB_USER', 'postgres'),
 	password: env('DB_PASSWORD', 'postgres'),
 	database: env('DB_NAME', 'postgres'),
-	entities,
+	entities: await getEntities(),
 	synchronize: !isProduction,
 	migrationsRun: isProduction,
-	migrations: ['src/migrations/*.ts'],
+	migrations: ['migrations/*.js'],
 	logging: false,
 	cache: {
 		type: 'redis',

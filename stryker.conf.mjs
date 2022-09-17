@@ -8,8 +8,7 @@ const config = {
 	testRunner: 'command',
 	timeoutFactor: 3,
 	commandRunner: {
-		command: 'npx vitest run -c vitest.mutation.ts',
+		command: 'npx vitest run --dir backend/tests/unit',
 	},
-	coverageAnalysis: 'perTest',
 };
 export default config;

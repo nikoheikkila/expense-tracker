@@ -1,7 +1,7 @@
-import { Operator, querySchema } from '../../../lib/interfaces';
-import Expense from '../domain/entities/Expense';
-import { Validator } from '../../../lib/validation';
-import type { IRepository } from './repository';
+import { Operator, querySchema } from '@lib/interfaces';
+import Expense from '@backend/domain/entities/Expense';
+import { Validator } from '@lib/validation';
+import type { IRepository } from '@backend/services/repository';
 
 export class MissingExpenseError extends Error {}
 export class InvalidRequestError extends Error {}

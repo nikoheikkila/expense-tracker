@@ -1,0 +1,79 @@
+version: '3'
+
+tasks:
+  tsc:
+    desc: Compile TypeScript to JavaScript
+    dir: backend
+    deps:
+      - :install
+    sources:
+      - backend/**/*.ts
+      - tsconfig.json
+    generates:
+      - dist
+    cmds:
+      - npx tsc
+      - npx tsc-alias
+
+  test:unit:
+    desc: Run unit tests
+    dir: backend
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+      - vitest.config.ts
+    cmds:
+      - npx vitest --dir ./tests/unit {{.CLI_ARGS}}
+
+  test:integration:
+    desc: Run integration tests
+    dir: backend
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+      - vitest.config.ts
+    cmds:
+      - npx vitest --dir ./tests/integration {{.CLI_ARGS}}
+
+  test:mutation:
+    desc: Run mutation tests
+    cmds:
+      - npx stryker run
+
+  start:
+    desc: Start the backend server for production
+    dir: backend
+    env:
+      NODE_ENV: production
+    cmds:
+      - npx esno src/server.ts
+
+  dev:
+    desc: Start the backend server for development
+    dir: backend
+    env:
+      NODE_ENV: development
+    cmds:
+      - npx esno watch server.ts
+
+  migration:create:
+    desc: Create a new database migration
+    dir: backend
+    cmds:
+      - npx typeorm migration:create ./migrations/{{.CLI_ARGS}}
+
+  migration:run:
+    desc: Run all pending migrations
+    dir: dist/backend
+    deps:
+      - tsc
+    cmds:
+      - npx typeorm migration:run -d src/config.js
+
+  migration:revert:
+    desc: Rollback latest migration
+    deps:
+      - tsc
+    dir: dist/backend
+    cmds:
+      - npx typeorm migration:revert -d config.js

@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { z } from 'zod';
-import { Validator } from '../../../../lib/validation.js';
+import { Validator } from '@lib/validation';
 
 const nanoIdPattern = new RegExp('[A-Za-z0-9_-]{21}');
 

@@ -5,12 +5,10 @@ pre-push:
       tags: security
       run: yarn audit
     tests:
-      run: task lint test:unit
-      env:
-        CI: true
+      run: CI=true task lint backend:test:unit
 
 pre-commit:
   parallel: true
   commands:
     format:
-      run: task format && git add -A
+      run: task format

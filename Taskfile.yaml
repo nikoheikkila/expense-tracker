@@ -13,98 +13,41 @@ env:
   DB_VERSION: 14
   REDIS_URL: redis://localhost:63790
 
+includes:
+  backend: ./backend
+
 tasks:
   install:
+    desc: Install dependencies
     sources:
       - package.json
+      - backend/package.json
+      - frontend/package.json
       - yarn.lock
     generates:
       - node_modules
     cmds:
-      - yarn --frozen-lockfile --prefer-offline
-
-  tsc:
-    sources:
-      - backend/**/*.ts
-      - lib/**/*.ts
-      - tsconfig.json
-    generates:
-      - dist
-    cmds:
-      - npx tsc
-
-  docker:
-    cmds:
-      - docker-compose up -d
+      - yarn install --frozen-lockfile --prefer-offline
 
   format:
+    desc: Format codebase
     cmds:
       - npx prettier --write .
 
   lint:
+    desc: Lint codebase
     cmds:
       - npx prettier --check .
 
+  docker:
+    desc: Start Docker services
+    dir: backend
+    cmds:
+      - docker-compose up -d
+
   test:
+    desc: Run acceptance tests
     cmds:
-      - task: test:unit
-      - task: test:integration
-      - task: test:mutation
-
-  test:unit:
-    sources:
-      - backend/src/**/*.ts
-      - backend/tests/**/*.ts
-      - vitest.config.ts
-    cmds:
-      - npx vitest --dir backend/tests/unit {{.CLI_ARGS}}
-
-  test:integration:
-    sources:
-      - backend/src/**/*.ts
-      - backend/tests/**/*.ts
-      - vitest.config.ts
-    cmds:
-      - npx vitest --dir backend/tests/integration {{.CLI_ARGS}}
-
-  test:mutation:
-    cmds:
-      - npx stryker run
-
-  start:
-    desc: Start the backend server for production
-    dir: backend
-    env:
-      NODE_ENV: production
-    cmds:
-      - npx esno server.ts
-
-  dev:
-    desc: Start the backend server for development
-    dir: backend
-    env:
-      NODE_ENV: development
-    cmds:
-      - npx esno watch server.ts
-
-  migration:create:
-    desc: Create a new database migration
-    dir: backend
-    cmds:
-      - npx typeorm migration:create ./migrations/{{.CLI_ARGS}}
-
-  migration:run:
-    desc: Run all pending migrations
-    deps:
-      - tsc
-    dir: dist/backend
-    cmds:
-      - npx typeorm migration:run -d config.js
-
-  migration:revert:
-    desc: Rollback latest migration
-    deps:
-      - tsc
-    dir: dist/backend
-    cmds:
-      - npx typeorm migration:revert -d config.js
+      - task: backend:test:unit
+      - task: backend:test:integration
+      - task: backend:test:mutation
