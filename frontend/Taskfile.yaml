@@ -1,7 +1,6 @@
 version: '3'
 
 tasks:
-
   typescript:
     dir: frontend
     sources:
@@ -23,3 +22,15 @@ tasks:
       - typescript
     cmds:
       - npx vite build
+
+  test:
+    desc: Run frontend unit tests
+    dir: frontend
+    cmds:
+      - npx vitest run {{.CLI_ARGS}}
+
+  test:watch:
+    desc: Watch for frontend unit tests
+    dir: frontend
+    cmds:
+      - npx vitest watch {{.CLI_ARGS}}
