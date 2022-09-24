@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - package.json
+      - yarn.lock
+      - backend/**
+      - lib/**
   pull_request:
     branches:
       - main
