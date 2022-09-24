@@ -27,7 +27,7 @@ tasks:
     desc: Run frontend unit tests
     dir: frontend
     cmds:
-      - npx vitest run {{.CLI_ARGS}}
+      - npx vitest -c vitest.frontend.ts --dir tests {{.CLI_ARGS}}
 
   test:watch:
     desc: Watch for frontend unit tests

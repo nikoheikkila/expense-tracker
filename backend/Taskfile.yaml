@@ -23,7 +23,7 @@ tasks:
       - ./tests/**/*.ts
       - vitest.config.ts
     cmds:
-      - npx vitest --dir ./tests/unit {{.CLI_ARGS}}
+      - npx vitest -c vitest.backend.ts --dir ./tests/unit {{.CLI_ARGS}}
 
   test:integration:
     desc: Run integration tests
@@ -33,7 +33,7 @@ tasks:
       - ./tests/**/*.ts
       - vitest.config.ts
     cmds:
-      - npx vitest --dir ./tests/integration {{.CLI_ARGS}}
+      - npx vitest -c vitest.backend.ts --dir ./tests/integration {{.CLI_ARGS}}
 
   test:mutation:
     desc: Run mutation tests

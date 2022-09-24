@@ -50,5 +50,6 @@ tasks:
     desc: Run acceptance tests
     cmds:
       - task: backend:test:unit
+      - task: frontend:test
       - task: backend:test:integration
       - task: backend:test:mutation

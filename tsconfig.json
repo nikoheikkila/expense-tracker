@@ -9,6 +9,7 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"strictPropertyInitialization": false,
-		"baseUrl": "./"
+		"baseUrl": "./",
+		"jsx": "react"
 	}
 }

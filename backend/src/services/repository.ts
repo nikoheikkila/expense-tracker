@@ -1,8 +1,8 @@
+import AppDataSource from '@backend/config';
+import Expense from '@backend/domain/entities/Expense';
+import { Operator } from '@lib/interfaces';
 import collect, { Collection } from 'collect.js';
 import { DataSource, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
-import AppDataSource from '@backend/config';
-import { Operator } from '@lib/interfaces';
-import Expense from '@backend/domain/entities/Expense';
 
 export interface IRepository<T> {
 	transacting<R>(operation: () => R): Promise<R>;

@@ -8,7 +8,7 @@ const config = {
 	testRunner: 'command',
 	timeoutFactor: 3,
 	commandRunner: {
-		command: 'npx vitest run --dir backend/tests/unit',
+		command: 'npx vitest run -c backend/vitest.backend.ts --dir backend/tests/unit',
 	},
 };
 export default config;
