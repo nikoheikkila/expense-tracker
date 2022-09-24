@@ -1,0 +1,94 @@
+name: Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - yarn.lock
+      - frontend/**
+      - lib/**
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  commit-stage:
+    name: Frontend Commit Stage Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: yarn
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: task install
+
+      - name: Lint codebase
+        run: task lint
+
+      - name: Run unit tests
+        run: task frontend:test
+
+  acceptance-stage:
+    name: Frontend Acceptance Stage Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: yarn
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: task install
+
+      - name: Build application
+        run: task frontend:build
+
+  deploy:
+    name: Frontend Deployment
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    needs:
+      - commit-stage
+      - acceptance-stage
+
+    steps:
+      - name: Deploy
+        run: echo 'Deploying...'
+
+  smoke-test:
+    name: Frontend Smoke Tests
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    needs: deploy
+
+    steps:
+      - name: Run smoke tests
+        run: echo 'Running smoke tests...'
