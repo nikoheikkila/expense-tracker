@@ -1,0 +1,25 @@
+version: '3'
+
+tasks:
+
+  typescript:
+    dir: frontend
+    sources:
+      - ./src/**/*.ts
+      - ./src/**/*.tsx
+    cmds:
+      - npx tsc
+
+  dev:
+    desc: Start frontend in development mode
+    dir: frontend
+    cmds:
+      - npx vite
+
+  build:
+    desc: Build frontend for production
+    dir: frontend
+    deps:
+      - typescript
+    cmds:
+      - npx vite build

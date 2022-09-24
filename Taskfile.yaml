@@ -15,6 +15,7 @@ env:
 
 includes:
   backend: ./backend
+  frontend: ./frontend
 
 tasks:
   install:
