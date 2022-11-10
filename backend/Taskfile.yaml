@@ -23,7 +23,7 @@ tasks:
       - ./tests/**/*.ts
       - vitest.config.ts
     cmds:
-      - npx vitest -c vitest.backend.ts --dir ./tests/unit {{.CLI_ARGS}}
+      - npx vitest run -c vitest.backend.ts --dir ./tests/unit {{.CLI_ARGS}}
 
   test:integration:
     desc: Run integration tests

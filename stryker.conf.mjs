@@ -2,6 +2,7 @@
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 const config = {
 	mutate: ['backend/src/{domain,services}/**/*.ts', 'lib/**/*.ts'],
+	tempDirName: '/tmp/stryker-tmp',
 	tsconfigFile: 'tsconfig.json',
 	packageManager: 'yarn',
 	reporters: ['html', 'clear-text', 'progress'],
