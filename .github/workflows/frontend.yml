@@ -41,7 +41,7 @@ jobs:
         run: task lint
 
       - name: Run unit tests
-        run: task frontend:test
+        run: task frontend:test:unit
 
   acceptance-stage:
     name: Frontend Acceptance Stage Tests

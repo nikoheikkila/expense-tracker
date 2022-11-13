@@ -64,7 +64,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Launch Docker services
-        run: task docker
+        run: task docker:up
 
       - name: Install dependencies
         run: task install
