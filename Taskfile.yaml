@@ -32,13 +32,15 @@ tasks:
 
   format:
     desc: Format codebase
-    cmds:
-      - npx rome format --write **/*.ts
+    deps:
+      - task: backend:format
+      - task: frontend:format
 
   lint:
     desc: Lint codebase
-    cmds:
-      - npx rome check **/*.ts
+    deps:
+      - task: backend:lint
+      - task: frontend:lint
 
   docker:up:
     desc: Start Docker services
@@ -48,6 +50,8 @@ tasks:
 
   test:
     desc: Run acceptance tests
+    deps:
+      - task: lint
     cmds:
       - task: docker:up
       - task: backend:test:unit

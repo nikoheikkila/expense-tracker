@@ -15,6 +15,22 @@ tasks:
       - npx tsc
       - npx tsc-alias
 
+  format:
+    desc: Format backend codebase
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+    cmds:
+      - npx rome format --write **/*.ts
+
+  lint:
+    desc: Lint backend codebase
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+    cmds:
+      - npx rome check **/*.ts
+
   test:unit:
     desc: Run unit tests
     dir: backend

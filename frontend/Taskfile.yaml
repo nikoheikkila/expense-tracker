@@ -26,6 +26,30 @@ tasks:
     cmds:
       - npx vite build
 
+  format:
+    desc: Format codebase
+    dir: frontend
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+      - ./src/**/*.tsx
+      - ./tests/**/*.tsx
+    cmds:
+      - npx rome format --write **/*.ts
+      - npx rome format --write **/*.tsx
+
+  lint:
+    desc: Lint codebase
+    dir: frontend
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+      - ./src/**/*.tsx
+      - ./tests/**/*.tsx
+    cmds:
+      - npx rome check **/*.ts
+      - npx rome check **/*.tsx
+
   test:unit:
     desc: Run frontend unit tests
     dir: frontend
