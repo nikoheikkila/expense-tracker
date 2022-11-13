@@ -13,6 +13,9 @@ env:
   DB_VERSION: 14
   REDIS_URL: redis://localhost:63790
 
+vars:
+  TS_PATTERNS: "**/*.{ts,tsx}"
+
 includes:
   backend: ./backend
   frontend: ./frontend
@@ -33,12 +36,12 @@ tasks:
   format:
     desc: Format codebase
     cmds:
-      - npx prettier --write .
+      - npx rome format --write {{.TS_PATTERNS}}
 
   lint:
     desc: Lint codebase
     cmds:
-      - npx prettier --check .
+      - npx rome check {{.TS_PATTERNS}}
 
   docker:
     desc: Start Docker services

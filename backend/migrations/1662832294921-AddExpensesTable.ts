@@ -1,6 +1,6 @@
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-const table = 'expenses';
+const table = "expenses";
 
 export class AddExpensesTable1662832294921 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {
@@ -8,11 +8,11 @@ export class AddExpensesTable1662832294921 implements MigrationInterface {
 			new Table({
 				name: table,
 				columns: [
-					{ name: 'id', type: 'varchar', length: '21', isPrimary: true },
-					{ name: 'name', type: 'varchar', length: '255' },
-					{ name: 'price', type: 'integer' },
-					{ name: 'updated_at', type: 'timestamp' },
-					{ name: 'created_at', type: 'timestamp' },
+					{ name: "id", type: "varchar", length: "21", isPrimary: true },
+					{ name: "name", type: "varchar", length: "255" },
+					{ name: "price", type: "integer" },
+					{ name: "updated_at", type: "timestamp" },
+					{ name: "created_at", type: "timestamp" },
 				],
 			}),
 			true,

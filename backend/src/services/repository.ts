@@ -1,8 +1,13 @@
-import AppDataSource from '@backend/config';
-import Expense from '@backend/domain/entities/Expense';
-import { Operator } from '@lib/interfaces';
-import collect, { Collection } from 'collect.js';
-import { DataSource, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
+import AppDataSource from "@backend/config";
+import Expense from "@backend/domain/entities/Expense";
+import { Operator } from "@lib/interfaces";
+import collect, { Collection } from "collect.js";
+import {
+	DataSource,
+	Repository,
+	SelectQueryBuilder,
+	UpdateResult,
+} from "typeorm";
 
 export interface IRepository<T> {
 	transacting<R>(operation: () => R): Promise<R>;
@@ -27,7 +32,7 @@ export class InMemoryRepository<T> implements IRepository<T> {
 	}
 
 	public async get(...ids: string[]): Promise<T[]> {
-		return this.items.whereIn('id', ids).all();
+		return this.items.whereIn("id", ids).all();
 	}
 
 	public async add(...items: T[]): Promise<T[]> {
@@ -50,19 +55,23 @@ export class InMemoryRepository<T> implements IRepository<T> {
 		return this.items.all();
 	}
 
-	public async findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
+	public async findBy(
+		key: string,
+		operator: Operator,
+		value: unknown,
+	): Promise<T[]> {
 		return this.items.where(key, operator as any, value).all();
 	}
 
 	public async update(id: string, mutation: Partial<T>): Promise<T> {
 		return this.items
-			.where('id', id)
+			.where("id", id)
 			.transform((item) => ({ ...item, ...mutation }))
 			.firstOrFail();
 	}
 
 	public async delete(...ids: string[]): Promise<void> {
-		this.items = this.items.whereNotIn('id', ids);
+		this.items = this.items.whereNotIn("id", ids);
 	}
 
 	public async clear(): Promise<void> {
@@ -74,7 +83,7 @@ export class InMemoryRepository<T> implements IRepository<T> {
 export class ExpenseRepository implements IRepository<Expense> {
 	private readonly dataSource: DataSource;
 	private readonly repository: Repository<Expense>;
-	private readonly tableName: string = 'expenses';
+	private readonly tableName: string = "expenses";
 
 	constructor(dataSource: DataSource) {
 		this.dataSource = dataSource;
@@ -113,7 +122,7 @@ export class ExpenseRepository implements IRepository<Expense> {
 			.insert()
 			.into(this.tableName)
 			.values(items)
-			.returning(['id', 'name', 'price'])
+			.returning(["id", "name", "price"])
 			.execute();
 
 		return raw;
@@ -121,15 +130,24 @@ export class ExpenseRepository implements IRepository<Expense> {
 	public async list(): Promise<Expense[]> {
 		return this.query.getMany();
 	}
-	public async findBy(key: string, operator: Operator, value: unknown): Promise<Expense[]> {
-		return this.query.where(`${this.tableName}.${key} ${operator} :value`, { value }).getMany();
+	public async findBy(
+		key: string,
+		operator: Operator,
+		value: unknown,
+	): Promise<Expense[]> {
+		return this.query
+			.where(`${this.tableName}.${key} ${operator} :value`, { value })
+			.getMany();
 	}
-	public async update(id: string, mutation: Partial<Expense>): Promise<Expense> {
+	public async update(
+		id: string,
+		mutation: Partial<Expense>,
+	): Promise<Expense> {
 		const result = await this.query
 			.update(this.tableName)
 			.set(mutation)
-			.where('id = :id', { id })
-			.returning(['id', 'name', 'price'])
+			.where("id = :id", { id })
+			.returning(["id", "name", "price"])
 			.execute();
 
 		return this.parseUpdateResult(result);

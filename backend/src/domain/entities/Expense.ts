@@ -1,16 +1,22 @@
-import 'reflect-metadata';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { z } from 'zod';
-import { Validator } from '@lib/validation';
+import "reflect-metadata";
+import {
+	Column,
+	CreateDateColumn,
+	Entity,
+	PrimaryColumn,
+	UpdateDateColumn,
+} from "typeorm";
+import { z } from "zod";
+import { Validator } from "@lib/validation";
 
-const nanoIdPattern = new RegExp('[A-Za-z0-9_-]{21}');
+const nanoIdPattern = new RegExp("[A-Za-z0-9_-]{21}");
 
 const expenseSchema = z.object({
 	id: z.string().regex(nanoIdPattern, {
 		message: `Expense ID must match regular expression: ${nanoIdPattern}`,
 	}),
-	name: z.string().min(1, 'Expense name must not be empty'),
-	price: z.number().gte(0, 'Expense price must be greater than zero'),
+	name: z.string().min(1, "Expense name must not be empty"),
+	price: z.number().gte(0, "Expense price must be greater than zero"),
 	updatedAt: z.date().optional(),
 	createdAt: z.date().optional(),
 });

@@ -1,7 +1,7 @@
-import { Operator, querySchema } from '@lib/interfaces';
-import Expense from '@backend/domain/entities/Expense';
-import { Validator } from '@lib/validation';
-import type { IRepository } from '@backend/services/repository';
+import { Operator, querySchema } from "@lib/interfaces";
+import Expense from "@backend/domain/entities/Expense";
+import { Validator } from "@lib/validation";
+import type { IRepository } from "@backend/services/repository";
 
 export class MissingExpenseError extends Error {}
 export class InvalidRequestError extends Error {}
@@ -21,7 +21,7 @@ class ExpenseTracker {
 
 	public async addExpenses(...expenses: Expense[]): Promise<Expense[]> {
 		if (expenses.length === 0) {
-			throw new InvalidRequestError('List of expenses to add cannot be empty');
+			throw new InvalidRequestError("List of expenses to add cannot be empty");
 		}
 
 		return this.repository.transacting(() => {
@@ -34,7 +34,9 @@ class ExpenseTracker {
 			const result = await this.repository.get(...ids);
 
 			if (result.length === 0) {
-				throw new MissingExpenseError(`Expenses with IDs (${ids.join(', ')}) do not exist`);
+				throw new MissingExpenseError(
+					`Expenses with IDs (${ids.join(", ")}) do not exist`,
+				);
 			}
 
 			return result;
@@ -52,8 +54,10 @@ class ExpenseTracker {
 			const result = await this.repository.findBy(key, operator, value);
 
 			if (result.length === 0) {
-				const query = [key, operator, value].join('');
-				throw new MissingExpenseError(`Expense not found with given query: ${query}`);
+				const query = [key, operator, value].join("");
+				throw new MissingExpenseError(
+					`Expense not found with given query: ${query}`,
+				);
 			}
 
 			return result;
@@ -71,7 +75,9 @@ class ExpenseTracker {
 
 	public async deleteExpenses(...ids: string[]): Promise<void> {
 		if (ids.length === 0) {
-			throw new InvalidRequestError('List of expense IDs to delete cannot be empty');
+			throw new InvalidRequestError(
+				"List of expense IDs to delete cannot be empty",
+			);
 		}
 
 		return this.repository.transacting(async () => {
@@ -87,7 +93,7 @@ const validateIncompatibleForeignKeys = (a: Expense, b: Expense): void => {
 
 	if (theirKeys.length === 0) {
 		throw new InvalidRequestError(
-			'Specify one or more allowed key-value pairs to update the expense',
+			"Specify one or more allowed key-value pairs to update the expense",
 		);
 	}
 
@@ -96,7 +102,7 @@ const validateIncompatibleForeignKeys = (a: Expense, b: Expense): void => {
 	if (incompatibleKeys.length > 0) {
 		throw new InvalidRequestError(
 			`Unrecognized key-value pairs (${incompatibleKeys.join(
-				', ',
+				", ",
 			)}) used to update the expense`,
 		);
 	}

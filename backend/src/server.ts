@@ -1,5 +1,5 @@
-import APIClient from '@backend/api/client';
-import AppDataSource from '@backend/config';
+import APIClient from "@backend/api/client";
+import AppDataSource from "@backend/config";
 
 const server = APIClient({
 	logger: {
