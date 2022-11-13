@@ -18,14 +18,23 @@ tasks:
   build:
     desc: Build frontend for production
     dir: frontend
+    sources:
+      - ./src/**/*.ts
+      - ./src/**/*.tsx
     deps:
       - typescript
     cmds:
       - npx vite build
 
-  test:
+  test:unit:
     desc: Run frontend unit tests
     dir: frontend
+    sources:
+      - ./src/**/*.ts
+      - ./src/**/*.tsx
+      - ./tests/**/*.ts
+      - ./tests/**/*.tsx
+      - vitest.frontend.ts
     cmds:
       - npx vitest run -c vitest.frontend.ts --dir tests {{.CLI_ARGS}}
 

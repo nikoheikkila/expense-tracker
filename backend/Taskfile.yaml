@@ -21,7 +21,7 @@ tasks:
     sources:
       - ./src/**/*.ts
       - ./tests/**/*.ts
-      - vitest.config.ts
+      - vitest.backend.ts
     cmds:
       - npx vitest run -c vitest.backend.ts --dir ./tests/unit {{.CLI_ARGS}}
 
@@ -31,12 +31,16 @@ tasks:
     sources:
       - ./src/**/*.ts
       - ./tests/**/*.ts
-      - vitest.config.ts
+      - vitest.backend.ts
     cmds:
       - npx vitest run -c vitest.backend.ts --dir ./tests/integration {{.CLI_ARGS}}
 
   test:mutation:
     desc: Run mutation tests
+    sources:
+      - ./src/**/*.ts
+      - ./tests/**/*.ts
+      - ../stryker.conf.mjs
     cmds:
       - npx stryker run
 

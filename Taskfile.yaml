@@ -46,18 +46,11 @@ tasks:
     cmds:
       - docker-compose up -d
 
-  docker:down:
-    desc: Remove Docker services
-    dir: backend
-    cmds:
-      - docker-compose down
-
   test:
     desc: Run acceptance tests
     cmds:
       - task: docker:up
       - task: backend:test:unit
-      - task: frontend:test
+      - task: frontend:test:unit
       - task: backend:test:integration
       - task: backend:test:mutation
-      - task: docker:down
