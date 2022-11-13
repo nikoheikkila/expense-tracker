@@ -1,8 +1,7 @@
 import { DataSource } from "typeorm";
 import path from "node:path";
 
-const env = (key: string, fallback: string): string =>
-	process.env[key] ?? fallback;
+const env = (key: string, fallback: string): string => process.env[key] ?? fallback;
 
 const environment = env("NODE_ENV", "development");
 const isProduction = environment === "production";

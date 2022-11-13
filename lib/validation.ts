@@ -1,4 +1,4 @@
-import { Schema, ZodTypeAny } from 'zod';
+import { Schema, ZodTypeAny } from "zod";
 
 type AnyRecord = Record<any, any>;
 

@@ -5,7 +5,8 @@
 	"type": "module",
 	"dependencies": {
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"rome": "^10.0.1"
 	},
 	"devDependencies": {
 		"@testing-library/jest-dom": "^5.16.5",

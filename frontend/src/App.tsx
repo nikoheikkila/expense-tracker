@@ -1,6 +1,6 @@
-import React from 'react';
-import './App.css';
-import reactLogo from './assets/react.svg';
+import React from "react";
+import "./App.css";
+import reactLogo from "./assets/react.svg";
 
 function App() {
 	const [count, setCount] = React.useState(0);

@@ -1,8 +1,5 @@
 import Expense from "@backend/domain/entities/Expense";
-import {
-	InvalidRequestError,
-	MissingExpenseError
-} from "@backend/services/expense_tracking";
+import { InvalidRequestError, MissingExpenseError } from "@backend/services/expense_tracking";
 import { ValidationError } from "@lib/validation";
 import { FastifyInstance, FastifyReply } from "fastify";
 import { FastifyReplyType } from "fastify/types/type-provider";
@@ -87,11 +84,7 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 			const { key, operator, value } = request.body;
 
 			try {
-				const expenses = await tracker.searchByQuery(
-					key,
-					operator as any,
-					value,
-				);
+				const expenses = await tracker.searchByQuery(key, operator as any, value);
 
 				return sendResponse<SearchExpenses["Reply"]>(response, 200, expenses);
 			} catch (error: unknown) {
@@ -115,21 +108,18 @@ export const register = (app: FastifyInstance): FastifyInstance => {
 				return sendError(response, error);
 			}
 		})
-		.delete<DeleteExpenses>(
-			"/api/expenses/delete",
-			async (request, response) => {
-				const tracker = app.diContainer.resolve("expenseTracker");
-				const { ids } = request.body;
+		.delete<DeleteExpenses>("/api/expenses/delete", async (request, response) => {
+			const tracker = app.diContainer.resolve("expenseTracker");
+			const { ids } = request.body;
 
-				try {
-					await tracker.deleteExpenses(...ids);
+			try {
+				await tracker.deleteExpenses(...ids);
 
-					return sendResponse<DeleteExpenses["Reply"]>(response, 204);
-				} catch (error) {
-					return sendError(response, error);
-				}
-			},
-		);
+				return sendResponse<DeleteExpenses["Reply"]>(response, 204);
+			} catch (error) {
+				return sendError(response, error);
+			}
+		});
 };
 
 const sendResponse = <P extends FastifyReplyType>(
@@ -160,5 +150,4 @@ const sendError = (response: FastifyReply, error: unknown): FastifyReply => {
 
 const isClientError = (error: unknown): error is ValidationError =>
 	error instanceof ValidationError || error instanceof InvalidRequestError;
-const isNotFoundError = (error: unknown): error is MissingExpenseError =>
-	error instanceof MissingExpenseError;
+const isNotFoundError = (error: unknown): error is MissingExpenseError => error instanceof MissingExpenseError;

@@ -34,20 +34,14 @@ class ExpenseTracker {
 			const result = await this.repository.get(...ids);
 
 			if (result.length === 0) {
-				throw new MissingExpenseError(
-					`Expenses with IDs (${ids.join(", ")}) do not exist`,
-				);
+				throw new MissingExpenseError(`Expenses with IDs (${ids.join(", ")}) do not exist`);
 			}
 
 			return result;
 		});
 	}
 
-	public async searchByQuery(
-		key: string,
-		operator: Operator,
-		value: unknown,
-	): Promise<Expense[]> {
+	public async searchByQuery(key: string, operator: Operator, value: unknown): Promise<Expense[]> {
 		this.queryValidator.parseObject({ key, operator, value });
 
 		return this.repository.transacting(async () => {
@@ -55,9 +49,7 @@ class ExpenseTracker {
 
 			if (result.length === 0) {
 				const query = [key, operator, value].join("");
-				throw new MissingExpenseError(
-					`Expense not found with given query: ${query}`,
-				);
+				throw new MissingExpenseError(`Expense not found with given query: ${query}`);
 			}
 
 			return result;
@@ -75,9 +67,7 @@ class ExpenseTracker {
 
 	public async deleteExpenses(...ids: string[]): Promise<void> {
 		if (ids.length === 0) {
-			throw new InvalidRequestError(
-				"List of expense IDs to delete cannot be empty",
-			);
+			throw new InvalidRequestError("List of expense IDs to delete cannot be empty");
 		}
 
 		return this.repository.transacting(async () => {
@@ -92,18 +82,14 @@ const validateIncompatibleForeignKeys = (a: Expense, b: Expense): void => {
 	const theirKeys = Object.keys(b);
 
 	if (theirKeys.length === 0) {
-		throw new InvalidRequestError(
-			"Specify one or more allowed key-value pairs to update the expense",
-		);
+		throw new InvalidRequestError("Specify one or more allowed key-value pairs to update the expense");
 	}
 
 	const incompatibleKeys = theirKeys.filter((key) => !ourKeys.includes(key));
 
 	if (incompatibleKeys.length > 0) {
 		throw new InvalidRequestError(
-			`Unrecognized key-value pairs (${incompatibleKeys.join(
-				", ",
-			)}) used to update the expense`,
+			`Unrecognized key-value pairs (${incompatibleKeys.join(", ")}) used to update the expense`,
 		);
 	}
 };

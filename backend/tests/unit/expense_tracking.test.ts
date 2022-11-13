@@ -1,25 +1,11 @@
 import { nanoid } from "nanoid";
-import {
-	afterEach,
-	beforeAll,
-	beforeEach,
-	describe,
-	expect,
-	test,
-	vi,
-} from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { Operator } from "@lib/interfaces";
 import Expense from "@backend/domain/entities/Expense";
 import ExpenseTracker from "@backend/services/expense_tracking";
-import {
-	InMemoryRepository,
-	ExpenseRepositoryFactory,
-} from "@backend/services/repository";
+import { InMemoryRepository, ExpenseRepositoryFactory } from "@backend/services/repository";
 
-const generateExpenseFixture = (
-	name: string = "Item",
-	price: number = 100,
-): Expense => {
+const generateExpenseFixture = (name: string = "Item", price: number = 100): Expense => {
 	return Expense.make({ id: nanoid(), name, price });
 };
 
@@ -61,18 +47,13 @@ describe("Expense Tracking", () => {
 		});
 
 		test("throws error when adding empty expense", async () => {
-			expect(tracker.addExpenses()).rejects.toThrow(
-				/List of expenses to add cannot be empty/,
-			);
+			expect(tracker.addExpenses()).rejects.toThrow(/List of expenses to add cannot be empty/);
 		});
 	});
 
 	describe("Searching expenses", () => {
 		test("finds expense by ID", async () => {
-			const [first, second] = await repository.add(
-				generateExpenseFixture("Lamp"),
-				generateExpenseFixture("Couch"),
-			);
+			const [first, second] = await repository.add(generateExpenseFixture("Lamp"), generateExpenseFixture("Couch"));
 
 			const [firstFound] = await tracker.searchById([first.id]);
 
@@ -87,11 +68,7 @@ describe("Expense Tracking", () => {
 				generateExpenseFixture(expectedName),
 			);
 
-			const [foundExpense] = await tracker.searchByQuery(
-				"name",
-				Operator.EQUAL,
-				expectedName,
-			);
+			const [foundExpense] = await tracker.searchByQuery("name", Operator.EQUAL, expectedName);
 
 			expect(foundExpense).not.toMatchObject(first);
 			expect(foundExpense).toMatchObject(second);
@@ -107,16 +84,8 @@ describe("Expense Tracking", () => {
 				generateExpenseFixture("Groceries", maximumPrice + 1),
 			);
 
-			const moreExpensiveThanMinimum = await tracker.searchByQuery(
-				"price",
-				Operator.GREATER_OR_EQUAL,
-				minimumPrice,
-			);
-			const cheaperThanMaximum = await tracker.searchByQuery(
-				"price",
-				Operator.LESS_OR_EQUAL,
-				maximumPrice,
-			);
+			const moreExpensiveThanMinimum = await tracker.searchByQuery("price", Operator.GREATER_OR_EQUAL, minimumPrice);
+			const cheaperThanMaximum = await tracker.searchByQuery("price", Operator.LESS_OR_EQUAL, maximumPrice);
 
 			expect(moreExpensiveThanMinimum).toHaveLength(3);
 			expect(cheaperThanMaximum).toHaveLength(3);
@@ -127,48 +96,38 @@ describe("Expense Tracking", () => {
 			const secondId = nanoid();
 			const expectedError = `Expenses with IDs (${firstId}, ${secondId}) do not exist`;
 
-			expect(tracker.searchById([firstId, secondId])).rejects.toThrowError(
-				expectedError,
-			);
+			expect(tracker.searchById([firstId, secondId])).rejects.toThrowError(expectedError);
 		});
 
 		test("throws error when expense is not found by query", async () => {
 			await repository.add(generateExpenseFixture("Groceries", 499));
 
-			expect(
-				tracker.searchByQuery("price", Operator.EQUAL, 500),
-			).rejects.toThrow(/Expense not found with given query: price=500/);
+			expect(tracker.searchByQuery("price", Operator.EQUAL, 500)).rejects.toThrow(
+				/Expense not found with given query: price=500/,
+			);
 		});
 
 		test("throws error with missing query key", async () => {
-			expect(tracker.searchByQuery("", Operator.EQUAL, 1)).rejects.toThrow(
-				/Query key must not be empty/,
-			);
+			expect(tracker.searchByQuery("", Operator.EQUAL, 1)).rejects.toThrow(/Query key must not be empty/);
 		});
 
 		test("throws error with missing query operator", async () => {
 			const operator = "" as Operator;
 
-			expect(tracker.searchByQuery("id", operator, 1)).rejects.toThrow(
-				/Query operator must not be empty/,
-			);
+			expect(tracker.searchByQuery("id", operator, 1)).rejects.toThrow(/Query operator must not be empty/);
 		});
 
 		test("throws error with invalid query operator", async () => {
 			const operator = "!!" as Operator;
 			const errorPattern = /Query operator must match regular expression: (.+)/;
 
-			expect(tracker.searchByQuery("id", operator, 1)).rejects.toThrow(
-				errorPattern,
-			);
+			expect(tracker.searchByQuery("id", operator, 1)).rejects.toThrow(errorPattern);
 		});
 	});
 
 	describe("Updating expenses", () => {
 		test("updates an existing expense with new details", async () => {
-			const [first] = await repository.add(
-				generateExpenseFixture("Old Name", 100),
-			);
+			const [first] = await repository.add(generateExpenseFixture("Old Name", 100));
 			const newDetails = generateExpenseFixture("New Name", 200);
 
 			const expense = await tracker.updateExpense(first.id, newDetails);
@@ -179,15 +138,11 @@ describe("Expense Tracking", () => {
 		test("throws error when updating a missing expense", async () => {
 			const newDetails = generateExpenseFixture("New Name", 200);
 
-			expect(tracker.updateExpense(nanoid(), newDetails)).rejects.toThrow(
-				/Expenses with IDs (.+) do not exist/,
-			);
+			expect(tracker.updateExpense(nanoid(), newDetails)).rejects.toThrow(/Expenses with IDs (.+) do not exist/);
 		});
 
 		test("throws error when updating expense with empty data", async () => {
-			const [expense] = await repository.add(
-				generateExpenseFixture("Old Name", 100),
-			);
+			const [expense] = await repository.add(generateExpenseFixture("Old Name", 100));
 
 			expect(tracker.updateExpense(expense.id, {} as Expense)).rejects.toThrow(
 				/Specify one or more allowed key-value pairs to update the expense/,
@@ -195,9 +150,7 @@ describe("Expense Tracking", () => {
 		});
 
 		test("throws error when updating expense with disallowed keys", async () => {
-			const [expense] = await repository.add(
-				generateExpenseFixture("Old Name", 100),
-			);
+			const [expense] = await repository.add(generateExpenseFixture("Old Name", 100));
 
 			const bogusData = { key1: "bogus", key2: "bogus" } as any as Expense;
 
@@ -209,10 +162,7 @@ describe("Expense Tracking", () => {
 
 	describe("Deleting expenses", () => {
 		test("deletes an existing expense", async () => {
-			const [expense1, expense2] = await repository.add(
-				generateExpenseFixture(),
-				generateExpenseFixture(),
-			);
+			const [expense1, expense2] = await repository.add(generateExpenseFixture(), generateExpenseFixture());
 
 			await tracker.deleteExpenses(expense1.id);
 			const expenses = await tracker.getExpenses();
@@ -221,10 +171,7 @@ describe("Expense Tracking", () => {
 		});
 
 		test("deletes multiple existing expenses", async () => {
-			const [expense1, expense2] = await repository.add(
-				generateExpenseFixture(),
-				generateExpenseFixture(),
-			);
+			const [expense1, expense2] = await repository.add(generateExpenseFixture(), generateExpenseFixture());
 
 			await tracker.deleteExpenses(expense1.id, expense2.id);
 			const expenses = await tracker.getExpenses();
@@ -233,29 +180,21 @@ describe("Expense Tracking", () => {
 		});
 
 		test("throws error when deleting a missing expense", async () => {
-			expect(tracker.deleteExpenses()).rejects.toThrow(
-				"List of expense IDs to delete cannot be empty",
-			);
+			expect(tracker.deleteExpenses()).rejects.toThrow("List of expense IDs to delete cannot be empty");
 		});
 	});
 
 	describe("Validating expense data", () => {
 		test("throws validation error for invalid ID", async () => {
-			expect(() => Expense.make({ id: "null" })).toThrowError(
-				/Expense ID must match regular expression/,
-			);
+			expect(() => Expense.make({ id: "null" })).toThrowError(/Expense ID must match regular expression/);
 		});
 
 		test("throws validation error for empty name", async () => {
-			expect(() => generateExpenseFixture("")).toThrowError(
-				/Expense name must not be empty/,
-			);
+			expect(() => generateExpenseFixture("")).toThrowError(/Expense name must not be empty/);
 		});
 
 		test("throws validation error for negative price", async () => {
-			expect(() => generateExpenseFixture("Negative", -1)).toThrowError(
-				/Expense price must be greater than zero/,
-			);
+			expect(() => generateExpenseFixture("Negative", -1)).toThrowError(/Expense price must be greater than zero/);
 		});
 	});
 });

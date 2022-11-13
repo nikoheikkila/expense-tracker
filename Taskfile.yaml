@@ -13,9 +13,6 @@ env:
   DB_VERSION: 14
   REDIS_URL: redis://localhost:63790
 
-vars:
-  TS_PATTERNS: "**/*.{ts,tsx}"
-
 includes:
   backend: ./backend
   frontend: ./frontend
@@ -36,23 +33,31 @@ tasks:
   format:
     desc: Format codebase
     cmds:
-      - npx rome format --write {{.TS_PATTERNS}}
+      - npx rome format --write **/*.ts
 
   lint:
     desc: Lint codebase
     cmds:
-      - npx rome check {{.TS_PATTERNS}}
+      - npx rome check **/*.ts
 
-  docker:
+  docker:up:
     desc: Start Docker services
     dir: backend
     cmds:
       - docker-compose up -d
 
+  docker:down:
+    desc: Remove Docker services
+    dir: backend
+    cmds:
+      - docker-compose down
+
   test:
     desc: Run acceptance tests
     cmds:
+      - task: docker:up
       - task: backend:test:unit
       - task: frontend:test
       - task: backend:test:integration
       - task: backend:test:mutation
+      - task: docker:down

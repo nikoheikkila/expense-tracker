@@ -2,12 +2,7 @@ import AppDataSource from "@backend/config";
 import Expense from "@backend/domain/entities/Expense";
 import { Operator } from "@lib/interfaces";
 import collect, { Collection } from "collect.js";
-import {
-	DataSource,
-	Repository,
-	SelectQueryBuilder,
-	UpdateResult,
-} from "typeorm";
+import { DataSource, Repository, SelectQueryBuilder, UpdateResult } from "typeorm";
 
 export interface IRepository<T> {
 	transacting<R>(operation: () => R): Promise<R>;
@@ -55,11 +50,7 @@ export class InMemoryRepository<T> implements IRepository<T> {
 		return this.items.all();
 	}
 
-	public async findBy(
-		key: string,
-		operator: Operator,
-		value: unknown,
-	): Promise<T[]> {
+	public async findBy(key: string, operator: Operator, value: unknown): Promise<T[]> {
 		return this.items.where(key, operator as any, value).all();
 	}
 
@@ -130,19 +121,10 @@ export class ExpenseRepository implements IRepository<Expense> {
 	public async list(): Promise<Expense[]> {
 		return this.query.getMany();
 	}
-	public async findBy(
-		key: string,
-		operator: Operator,
-		value: unknown,
-	): Promise<Expense[]> {
-		return this.query
-			.where(`${this.tableName}.${key} ${operator} :value`, { value })
-			.getMany();
+	public async findBy(key: string, operator: Operator, value: unknown): Promise<Expense[]> {
+		return this.query.where(`${this.tableName}.${key} ${operator} :value`, { value }).getMany();
 	}
-	public async update(
-		id: string,
-		mutation: Partial<Expense>,
-	): Promise<Expense> {
+	public async update(id: string, mutation: Partial<Expense>): Promise<Expense> {
 		const result = await this.query
 			.update(this.tableName)
 			.set(mutation)

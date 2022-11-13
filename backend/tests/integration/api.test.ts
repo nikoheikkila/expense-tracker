@@ -107,9 +107,7 @@ describe("API Tests", () => {
 				},
 			};
 			app.diContainer.register({
-				expenseRepository: asValue(
-					fakeRepository as unknown as IRepository<Expense>,
-				),
+				expenseRepository: asValue(fakeRepository as unknown as IRepository<Expense>),
 			});
 
 			const response = await app.inject({
@@ -347,8 +345,7 @@ describe("API Tests", () => {
 
 			expect(response.statusCode).toBe(400);
 			expect(response.json()).toMatchObject({
-				error:
-					"Bad Request: Unrecognized key-value pairs (vatPrice) used to update the expense",
+				error: "Bad Request: Unrecognized key-value pairs (vatPrice) used to update the expense",
 			});
 		});
 	});

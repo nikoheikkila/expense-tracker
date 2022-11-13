@@ -1,11 +1,5 @@
 import "reflect-metadata";
-import {
-	Column,
-	CreateDateColumn,
-	Entity,
-	PrimaryColumn,
-	UpdateDateColumn,
-} from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { z } from "zod";
 import { Validator } from "@lib/validation";
 
@@ -40,10 +34,7 @@ class Expense extends BaseEntity {
 	price: number;
 	@UpdateDateColumn({ type: 'timestamp', default: new Date(Date.now()) })
 	public static make(values: Partial<Expense>): Expense {
-		return Object.assign(
-			new Expense(),
-			Validator.withSchema(expenseSchema).parseObject(values),
-		);
+		return Object.assign(new Expense(), Validator.withSchema(expenseSchema).parseObject(values));
 	}
 }
 
